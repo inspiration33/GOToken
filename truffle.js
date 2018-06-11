@@ -4,6 +4,9 @@ require('babel-register')({
 });
 require('babel-polyfill');
 
+const HDWalletProvider = require("truffle-hdwallet-provider");
+const mnemonic = "stuff limit piano short armor like swarm drill raw earn firm consider";
+
 module.exports = {
   solc: {
     optimizer: {
@@ -22,6 +25,12 @@ module.exports = {
       port: 8545,
       network_id: "3",
       gas: 2900000
+    },
+    ropsten: {
+      provider: function() {
+        return new HDWalletProvider(mnemonic, "http://23.227.175.82:8545");
+      },
+      network_id: 3
     }
   }
 };

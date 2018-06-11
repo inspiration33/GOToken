@@ -9,8 +9,8 @@ pragma solidity ^0.4.19;
 import "./CrowdsaleBase.sol";
 import "./PGOVault.sol";
 import "./GotToken.sol";
-import "./PGOMonthlyPresaleVault.sol";
 import "./PGOMonthlyInternalVault.sol";
+import "./PGOMonthlyPresaleVault.sol";
 
 
 contract GotCrowdSale is CrowdsaleBase {

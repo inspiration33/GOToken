@@ -11,7 +11,6 @@ pragma solidity ^0.4.19;
 import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
-import "./GotCrowdSale.sol";
 import "./GotToken.sol";
 import "./PGOMonthlyInternalVault.sol";
 

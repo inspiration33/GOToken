@@ -6,9 +6,15 @@ const PGOMonthlyInternalVault = artifacts.require("./PGOMonthlyInternalVault.sol
 const PGOMonthlyPresaleVault = artifacts.require("./PGOMonthlyPresaleVault.sol");
 
 module.exports = function(deployer, network, accounts) {
-    const internalWallet = accounts[6];
-    const presaleWallet = accounts[5];
-    const reservationWallet = accounts[4];
+    let internalWallet = accounts[6];
+    let presaleWallet = accounts[5];
+    let reservationWallet = accounts[4];
+
+    if ( network == "ropsten") {
+        internalWallet = '0x40a0a75255DBaa2b232d11241E74743354F3D583';
+        presaleWallet = '0xe71E9931137A90CD2A98D71306cC2F5Bc5F801F3';
+        reservationWallet = '0x57B6A3C4143A087A8d9deb6AAab67bA9D255eBBC';
+    }
 
     //The lists of addresses and expected token amounts will be loaded here at ICO deploy time
 

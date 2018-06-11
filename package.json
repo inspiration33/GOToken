@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "truffle test ./test/got_crowdsale.js ./test/got_monthly_internal_vault.js ./test/got_monthly_presale_vault.js ./test/got_pgovault.js ./test/got_token.js"
+    "test": "truffle test ./test/got_crowdsale.js ./test/got_monthly_internal_vault.js ./test/got_monthly_presale_vault.js ./test/got_pgovault.js ./test/got_token.js",
+    "build": "solcpiler --config-file ./config/solcpiler.json"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +20,8 @@
     "openzeppelin-solidity": "^1.9.0",
     "path": "^0.12.7",
     "solcpiler": "0.0.17",
-    "truffle": "^4.1.11"
+    "truffle": "^4.1.11",
+    "truffle-hdwallet-provider": "0.0.5"
   },
   "babel": {
     "presets": [
