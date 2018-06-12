@@ -9,9 +9,9 @@
 6. Call the function in the crowdsale that mints the pre-allocated locked and unlocked liquidity funds `gotCrowdsaleInstance.mintPreAllocatedTokens()`
 7. Set the tokens for founders, advisors, teams and partners investments in the crowdsale by calling `gotCrowdSaleInstance.initPGOMonthlyInternalVault(beneficiaries, balances)`
 8. Set the tokens for private presales in the crowdsale by calling `gotCrowdSaleInstance.initPGOMonthlyPresaleVault(beneficiaries, balances)`
-9. Call the function in the crowdsale that mints the second presale phase (reservation contract) in the crowdsale by calling `gotCrowdSaleInstance.mintReservation(beneficiaries, balances)`
+9. Call the function in the crowdsale that mints the reservation phase in the crowdsale by calling `gotCrowdSaleInstance.mintReservation(beneficiaries, balances)`
 
-## During the Reservation & Crowdsale phases
+## During the Crowdsale phase
 ###### Callable by the owner only:
 * Pause/unpause the sales in case of an emergency:
     - `gotCrowdSaleInstance.pause()`, `gotCrowdSaleInstance.unpause()`
@@ -29,9 +29,9 @@
 
   The ownership of the GotToken contract will be transferred to the Crowdsale contract's owner.
 
-###### Reservation contract phase
-* The Reservation contract phase is intended to be part of the ICO phase and so it is entirely managed inside the `GotCrowdSale.sol` contract.
-* The `gotCrowdSaleInstance.mintReservation(beneficiary, balances)` does not instantiate an external contract, but it directly manages the vesting of tokens to the RC investors.
+###### Reservation phase
+* The Reservation phase is intended to start off-chain by accounting the addresses of the investors and their reserved GOTokens.
+* The reserved tokens will be distributed at the start of the ICO phase via the function `gotCrowdSaleInstance.mintReservation(beneficiary, balances)` in the `GotCrowdSale.sol` contract.
 
 ## Vesting phases
 * Presale investor can claim the vested tokens by calling `pgoMonthlyPresaleVault.release()`.  
@@ -68,7 +68,7 @@ https://github.com/eidoo/icoengine/blob/master/contracts/ICOEngineInterface.sol
 https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
 
 ###### Token allocation
-* Business fund
+* Internal Reserve fund
     * 35.000.000 tokens.
     * ¼ tokens unlocked 12 months after the end of ICO.
     * remaining ¾ unlocked 18, 24 and 30 months after the end of ICO.
@@ -105,14 +105,14 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
     * Continuous vesting: starts 3 months after the end of ICO and ends 21 months
     later.
 
-* Reservation contract
+* Reservation phase
     * 8.750.000 tokens.
     * 20% discount
     * Private invitation only
     * Require previous KYC Eidoo verification
 
 * Public ICO
-    * 2.750.000 tokens plus all not sold during Reservation contract phase
+    * 2.750.000 tokens plus all not sold during Reservation phase
     * 1 Token = 0.75 usd
 
 

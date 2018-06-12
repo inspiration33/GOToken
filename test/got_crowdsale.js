@@ -1,4 +1,4 @@
-import {expectThrow, getEvents, BigNumber, increaseTimeTo} from './helpers/tools';
+import {expectThrow, BigNumber, increaseTimeTo} from './helpers/tools';
 import {logger} from "./helpers/logger";
 
 const {ecsign} = require('ethereumjs-util');
@@ -47,7 +47,7 @@ const INVESTOR1_WEI = 1e18;
 const INVESTOR2_WEI = 5e18;
 const INVESTOR2_WEI2 = new BigNumber(6994 * 1e18);
 
-const INVESTOR1_TOKEN_AMOUNT = 270 * 1e18;
+//const INVESTOR1_TOKEN_AMOUNT = 270 * 1e18;
 
 /*TOKEN CAPS*/
 const INTERNAL_VAULT_CAP = new BigNumber(2.5e7 * 1e18);
@@ -66,7 +66,7 @@ contract('GotCrowdSale',(accounts) => {
     const activeInvestor3 = accounts[3];
     const wallet = accounts[7];
     const unlockedLiquidityWallet = accounts[8];
-    const lockedLiquidityWallet = accounts[9];
+    const internalReserveWallet = accounts[9];
 
     // Provide gotTokenInstance for every test case
     let gotTokenInstance;
@@ -94,12 +94,12 @@ contract('GotCrowdSale',(accounts) => {
         const remainingTokens = await gotCrowdSaleInstance.remainingTokens();
         const monthlyInternalVaultCap = await gotCrowdSaleInstance.MONTHLY_INTERNAL_VAULT_CAP();
         const unlockedLiquidityCap = await gotCrowdSaleInstance.PGO_UNLOCKED_LIQUIDITY_CAP();
-        const lockedLiquidityCap = await gotCrowdSaleInstance.PGO_LOCKED_LIQUIDITY_CAP();
+        const internalReserveCap = await gotCrowdSaleInstance.PGO_INTERNAL_RESERVE_CAP();
         const reservedPresaleCap = await gotCrowdSaleInstance.RESERVED_PRESALE_CAP();
         const reservationCap = await gotCrowdSaleInstance.RESERVATION_CAP();
         const _wallet = await gotCrowdSaleInstance.wallet();
         const _unlockedLiquidityWallet = await gotCrowdSaleInstance.pgoUnlockedLiquidityWallet();
-        const _lockedLiquidityWallet = await gotCrowdSaleInstance.pgoLockedLiquidityWallet();
+        const _internalReserveWallet = await gotCrowdSaleInstance.pgoInternalReserveWallet();
         const tokensSold = await gotCrowdSaleInstance.tokensSold();
 
         signer0.should.be.equal('0x627306090abaB3A6e1400e9345bC60c78a8BEf57'.toLowerCase());
@@ -110,10 +110,10 @@ contract('GotCrowdSale',(accounts) => {
         totalTokens.should.be.bignumber.equal(CROWDSALE_CAP);
         _wallet.should.equal(wallet);
         _unlockedLiquidityWallet.should.equal(unlockedLiquidityWallet);
-        _lockedLiquidityWallet.should.equal(lockedLiquidityWallet);
+        _internalReserveWallet.should.equal(internalReserveWallet);
         monthlyInternalVaultCap.should.be.bignumber.equal(INTERNAL_VAULT_CAP);
         unlockedLiquidityCap.should.be.bignumber.equal(PGO_UNLOCKED_LIQUIDITY_CAP);
-        lockedLiquidityCap.should.be.bignumber.equal(PGO_VAULT_CAP);
+        internalReserveCap.should.be.bignumber.equal(PGO_VAULT_CAP);
         reservedPresaleCap.should.be.bignumber.equal(PRESALE_VAULT_CAP);
         reservationCap.should.be.bignumber.equal(RESERVATION_CAP);
         tokensSold.should.be.bignumber.below(RESERVATION_CAP);

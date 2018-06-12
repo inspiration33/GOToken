@@ -6,7 +6,7 @@
  * @author ParkinGO
  */
 
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
@@ -37,7 +37,7 @@ contract PGOMonthlyPresaleVault is PGOMonthlyInternalVault {
             uint256 monthlyBalance = lockedBalance.div(VESTING_DIV_RATE);
             uint256 daysToSkip = 90 days;
             uint256 time = block.timestamp.sub(start).sub(daysToSkip);
-            uint256 elapsedOffsets = time.div(VESTING_OFFSETS);
+            uint256 elapsedOffsets = time.div(VESTING_INTERVAL);
             vested = vested.add(elapsedOffsets.mul(monthlyBalance));
         }
         if (block.timestamp >= end) {

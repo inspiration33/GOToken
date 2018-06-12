@@ -6,7 +6,7 @@
  * @author ParkinGO
  */
 
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
@@ -25,9 +25,9 @@ contract PGOMonthlyInternalVault {
     }
 
     /*** CONSTANTS ***/
-    uint256 public constant VESTING_DIV_RATE = 21;                   // division rate of monthly vesting
-    uint256 public constant VESTING_OFFSETS = 30 days;               // vesting interval
-    uint256 public constant VESTING_CLIFF = 90 days;                // vesting interval
+    uint256 public constant VESTING_DIV_RATE = 21;                  // division rate of monthly vesting
+    uint256 public constant VESTING_INTERVAL = 30 days;             // vesting interval
+    uint256 public constant VESTING_CLIFF = 90 days;                // duration until cliff is reached
     uint256 public constant VESTING_DURATION = 720 days;            // vesting duration
 
     GotToken public token;
@@ -90,7 +90,7 @@ contract PGOMonthlyInternalVault {
      * @dev Allows to check an investment.
      * @param index The index of investment to check.
      */
-    function getInvestment(uint index) public view returns(address, uint256, uint256) {
+    function getInvestment(uint256 index) public view returns(address, uint256, uint256) {
         return (investments[index].beneficiary,investments[index].totalBalance,investments[index].released);
     }
 
@@ -112,13 +112,12 @@ contract PGOMonthlyInternalVault {
         uint256 investmentIndex = investorLUT[beneficiary];
         uint256 vested = 0;
         if (block.timestamp >= cliff && block.timestamp < end) {
-            // after cliff -> 1/27 of totalBalance every month, must skip first 9 month 
+            // after cliff -> 1/21 of totalBalance every month, must skip first 3 months
             uint256 totalBalance = investments[investmentIndex].totalBalance;
             uint256 monthlyBalance = totalBalance.div(VESTING_DIV_RATE);
-            uint256 daysToSkip = 90 days;
-            uint256 time = block.timestamp.sub(start).sub(daysToSkip);
-            uint256 elapsedOffsets = time.div(VESTING_OFFSETS);
-            uint vestedToSum = elapsedOffsets.mul(monthlyBalance);
+            uint256 time = block.timestamp.sub(cliff);
+            uint256 elapsedOffsets = time.div(VESTING_INTERVAL);
+            uint256 vestedToSum = elapsedOffsets.mul(monthlyBalance);
             vested = vested.add(vestedToSum);
         }
         if (block.timestamp >= end) {

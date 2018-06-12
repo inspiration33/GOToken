@@ -4,28 +4,34 @@
  * @version 1.0
  * @author ParkinGo
  */
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
-import "./CrowdsaleBase.sol";
+import "../../node_modules/openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "../../node_modules/openzeppelin-solidity/contracts/ownership/CanReclaimToken.sol";
+
+import "./KYCBase.sol";
+import "./ICOEngineInterface.sol";
 import "./PGOVault.sol";
 import "./GotToken.sol";
 import "./PGOMonthlyInternalVault.sol";
 import "./PGOMonthlyPresaleVault.sol";
 
 
-contract GotCrowdSale is CrowdsaleBase {
+contract GotCrowdSale is Pausable, CanReclaimToken, ICOEngineInterface, KYCBase {
     /*** CONSTANTS ***/
     uint256 public constant START_TIME = 1528794000;                     // 12 June 2018 09:00:00 GMT
     uint256 public constant END_TIME = 1530003600;                       // 26 June 2018 09:00:00 GMT
+    uint256 public constant USD_PER_TOKEN = 75;                       // 0.75$
+    uint256 public constant USD_PER_ETHER = 60000;
 
     //Token allocation
     //Team, founder, partners and advisor cap locked using Monthly Internal Vault
     uint256 public constant MONTHLY_INTERNAL_VAULT_CAP = 2.5e7 * 1e18;
     //Company unlocked liquidity and Airdrop allocation
     uint256 public constant PGO_UNLOCKED_LIQUIDITY_CAP = 1.5e7 * 1e18;
-    //Locked company liquidity
-    uint256 public constant PGO_LOCKED_LIQUIDITY_CAP = 3.5e7 * 1e18;
-    //Reserved Presale Allocation  33% free and 67% locked using Monthly Presale Vault
+    //Internal reserve fund
+    uint256 public constant PGO_INTERNAL_RESERVE_CAP = 3.5e7 * 1e18;
+    //Reserved Presale Allocation 33% free and 67% locked using Monthly Presale Vault
     uint256 public constant RESERVED_PRESALE_CAP = 1.35e7 * 1e18;
 
     //ICO TOKEN ALLOCATION
@@ -36,6 +42,16 @@ contract GotCrowdSale is CrowdsaleBase {
     //TOTAL ICO CAP
     uint256 public constant TOTAL_MAX_CAP = 1.15e7 * 1e18;
 
+    uint256 public start;                                             // ICOEngineInterface
+    uint256 public end;                                               // ICOEngineInterface
+    uint256 public cap;                                               // ICOEngineInterface
+    uint256 public tokenPerEth;
+    uint256 public availableTokens;                                   // ICOEngineInterface
+    address[] public kycSigners;                                      // KYCBase
+    bool public capReached;
+    uint256 public weiRaised;
+    uint256 public tokensSold;
+
     // Vesting contracts.
     //Unlock funds after 9 months monthly
     PGOMonthlyInternalVault public pgoMonthlyInternalVault;
@@ -45,7 +61,7 @@ contract GotCrowdSale is CrowdsaleBase {
     PGOVault public pgoVault;
 
     // Vesting wallets.
-    address public pgoLockedLiquidityWallet;
+    address public pgoInternalReserveWallet;
     //Unlocked wallets
     address public pgoUnlockedLiquidityWallet;
     //ether wallet
@@ -60,43 +76,54 @@ contract GotCrowdSale is CrowdsaleBase {
      * @dev Constructor.
      * @param _token address contract got tokens.
      * @param _wallet The address where funds should be transferred.
-     * @param _pgoLockedLiquidityWallet The address where token will be send after vesting should be transferred.
+     * @param _pgoInternalReserveWallet The address where token will be send after vesting should be transferred.
      * @param _pgoUnlockedLiquidityWallet The address where token will be send after vesting should be transferred.
      * @param _pgoMonthlyInternalVault The address of internal funds vault contract with monthly unlocking after 9 months.
      * @param _pgoMonthlyPresaleVault The address of presale funds vault contract with 1/3 free funds and monthly unlocking after 9 months.
      * @param _kycSigners Array of the signers addresses required by the KYCBase constructor, provided by Eidoo.
      * See https://github.com/eidoo/icoengine
      */
-    function GotCrowdSale(
+    constructor(
         address _token,
         address _wallet,
-        address _pgoLockedLiquidityWallet,
+        address _pgoInternalReserveWallet,
         address _pgoUnlockedLiquidityWallet,
         address _pgoMonthlyInternalVault,
         address _pgoMonthlyPresaleVault,
         address[] _kycSigners
     )
         public
-        CrowdsaleBase(START_TIME, END_TIME, TOTAL_MAX_CAP, _wallet, _kycSigners)
+        KYCBase(_kycSigners)
     {
+        require(END_TIME >= START_TIME);
+        require(TOTAL_MAX_CAP > 0);
+
+        start = START_TIME;
+        end = END_TIME;
+        cap = TOTAL_MAX_CAP;
+        wallet = _wallet;
+        tokenPerEth = USD_PER_ETHER.div(USD_PER_TOKEN);
+        availableTokens = TOTAL_MAX_CAP;
+        kycSigners = _kycSigners;
+
         token = GotToken(_token);
         pgoMonthlyInternalVault = PGOMonthlyInternalVault(_pgoMonthlyInternalVault);
         pgoMonthlyPresaleVault = PGOMonthlyPresaleVault(_pgoMonthlyPresaleVault);
-        pgoLockedLiquidityWallet = _pgoLockedLiquidityWallet;
+        pgoInternalReserveWallet = _pgoInternalReserveWallet;
         pgoUnlockedLiquidityWallet = _pgoUnlockedLiquidityWallet;
         wallet = _wallet;
         // Creates ParkinGo vault contract
-        pgoVault = new PGOVault(pgoLockedLiquidityWallet, address(token), END_TIME);
+        pgoVault = new PGOVault(pgoInternalReserveWallet, address(token), END_TIME);
     }
 
     /**
      * @dev Mints unlocked tokens to unlockedLiquidityWallet and
-     * assings tokens to be held into the locked liquidity vault contracts.
+     * assings tokens to be held into the internal reserve vault contracts.
      * To be called by the crowdsale's owner only.
      */
     function mintPreAllocatedTokens() public onlyOwner {
         mintTokens(pgoUnlockedLiquidityWallet, PGO_UNLOCKED_LIQUIDITY_CAP);
-        mintTokens(address(pgoVault), PGO_LOCKED_LIQUIDITY_CAP);
+        mintTokens(address(pgoVault), PGO_INTERNAL_RESERVE_CAP);
     }
 
     /**
@@ -109,11 +136,15 @@ contract GotCrowdSale is CrowdsaleBase {
      * @param beneficiaries Array of the internal addresses to whom vested tokens are transferred.
      * @param balances Array of token amount per beneficiary.
      */
-    function initPGOMonthlyInternalVault(address[] beneficiaries, uint256[] balances) public onlyOwner {
-        require(beneficiaries.length == balances.length);
+    function initPGOMonthlyInternalVault(address[] beneficiaries, uint256[] balances)
+        public
+        onlyOwner
+        equalLength(beneficiaries, balances)
+    {
         uint256 totalInternalBalance = 0;
         uint256 balancesLength = balances.length;
-        for(uint256 i = 0; i < balancesLength; i++) {
+
+        for (uint256 i = 0; i < balancesLength; i++) {
             totalInternalBalance = totalInternalBalance.add(balances[i]);
         }
         //check that all balances matches internal vault allocated Cap
@@ -134,11 +165,15 @@ contract GotCrowdSale is CrowdsaleBase {
      * @param beneficiaries Array of the presale investors addresses to whom vested tokens are transferred.
      * @param balances Array of token amount per beneficiary.
      */
-    function initPGOMonthlyPresaleVault(address[] beneficiaries, uint256[] balances) public onlyOwner {
-        require(beneficiaries.length == balances.length);
+    function initPGOMonthlyPresaleVault(address[] beneficiaries, uint256[] balances)
+        public
+        onlyOwner
+        equalLength(beneficiaries, balances)
+    {
         uint256 totalPresaleBalance = 0;
         uint256 balancesLength = balances.length;
-        for(uint256 i = 0; i < balancesLength; i++) {
+
+        for (uint256 i = 0; i < balancesLength; i++) {
             totalPresaleBalance = totalPresaleBalance.add(balances[i]);
         }
         //check that all balances matches internal vault allocated Cap
@@ -157,26 +192,25 @@ contract GotCrowdSale is CrowdsaleBase {
      * @param beneficiaries Array of the reservation user that bought tokens in private reservation sale.
      * @param balances Array of token amount per beneficiary.
      */
-    function mintReservation(address[] beneficiaries, uint256[] balances) public onlyOwner {
-        require(beneficiaries.length == balances.length);
-
+    function mintReservation(address[] beneficiaries, uint256[] balances)
+        public
+        onlyOwner
+        equalLength(beneficiaries, balances)
+    {
         uint256 totalReservationBalance = 0;
         uint256 balancesLength = balances.length;
 
-        for(uint256 i = 0; i < balancesLength; i++) {
+        for (uint256 i = 0; i < balancesLength; i++) {
             totalReservationBalance = totalReservationBalance.add(balances[i]);
-        }
-
-        require(totalReservationBalance <= RESERVATION_CAP);
-
-        for(uint256 z = 0; z < balancesLength; z++) {
-            uint256 amount = balances[z];
+            uint256 amount = balances[i];
             //update token sold of crowdsale contract
             tokensSold = tokensSold.add(amount);
             //update available token of crowdsale contract
             availableTokens = availableTokens.sub(amount);
-            mintTokens(beneficiaries[z], amount);
+            mintTokens(beneficiaries[i], amount);
         }
+
+        require(totalReservationBalance <= RESERVATION_CAP);
     }
 
     /**
@@ -213,6 +247,126 @@ contract GotCrowdSale is CrowdsaleBase {
     }
 
     /**
+     * @dev Implements the ICOEngineInterface.
+     * @return False if the ico is not started, true if the ico is started and running, true if the ico is completed.
+     */
+    function started() public view returns(bool) {
+        if (block.timestamp >= start) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @dev Implements the ICOEngineInterface.
+     * @return False if the ico is not started, false if the ico is started and running, true if the ico is completed.
+     */
+    function ended() public view returns(bool) {
+        if (block.timestamp >= end) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @dev Implements the ICOEngineInterface.
+     * @return Timestamp of the ico start time.
+     */
+    function startTime() public view returns(uint) {
+        return start;
+    }
+
+    /**
+     * @dev Implements the ICOEngineInterface.
+     * @return Timestamp of the ico end time.
+     */
+    function endTime() public view returns(uint) {
+        return end;
+    }
+
+    /**
+     * @dev Implements the ICOEngineInterface.
+     * @return The total number of the tokens available for the sale, must not change when the ico is started.
+     */
+    function totalTokens() public view returns(uint) {
+        return cap;
+    }
+
+    /**
+     * @dev Implements the ICOEngineInterface.
+     * @return The number of the tokens available for the ico.
+     * At the moment the ico starts it must be equal to totalTokens(),
+     * then it will decrease.
+     */
+    function remainingTokens() public view returns(uint) {
+        return availableTokens;
+    }
+
+    /**
+     * @dev Implements the KYCBase senderAllowedFor function to enable a sender to buy tokens for a different address.
+     * @return true.
+     */
+    function senderAllowedFor(address buyer) internal view returns(bool) {
+        require(buyer != address(0));
+
+        return true;
+    }
+
+    /**
+     * @dev Implements the KYCBase releaseTokensTo function to mint tokens for an investor.
+     * Called after the KYC process has passed.
+     * @return A boolean that indicates if the operation was successful.
+     */
+    function releaseTokensTo(address buyer) internal returns(bool) {
+        require(validPurchase());
+
+        uint256 overflowTokens;
+        uint256 refundWeiAmount;
+
+        uint256 weiAmount = msg.value;
+        uint256 tokenAmount = weiAmount.mul(price());
+
+        if (tokenAmount >= availableTokens) {
+            capReached = true;
+            overflowTokens = tokenAmount.sub(availableTokens);
+            tokenAmount = tokenAmount.sub(overflowTokens);
+            refundWeiAmount = overflowTokens.div(price());
+            weiAmount = weiAmount.sub(refundWeiAmount);
+            buyer.transfer(refundWeiAmount);
+        }
+
+        weiRaised = weiRaised.add(weiAmount);
+        tokensSold = tokensSold.add(tokenAmount);
+        availableTokens = availableTokens.sub(tokenAmount);
+        mintTokens(buyer, tokenAmount);
+        forwardFunds(weiAmount);
+
+        return true;
+    }
+
+    /**
+     * @dev Fired by the releaseTokensTo function after minting tokens,
+     * to forward the raised wei to the address that collects funds.
+     * @param _weiAmount Amount of wei send by the investor.
+     */
+    function forwardFunds(uint256 _weiAmount) internal {
+        wallet.transfer(_weiAmount);
+    }
+
+    /**
+     * @dev Validates an incoming purchase. Required statements revert state when conditions are not met.
+     * @return true If the transaction can buy tokens.
+     */
+    function validPurchase() internal view returns (bool) {
+        require(!paused && !capReached);
+        require(block.timestamp >= start && block.timestamp <= end);
+
+        return true;
+    }
+
+    /**
      * @dev Mints tokens being sold during the crowdsale phase as part of the implementation of releaseTokensTo function
      * from the KYCBase contract.
      * @param to The address that will receive the minted tokens.
@@ -220,6 +374,11 @@ contract GotCrowdSale is CrowdsaleBase {
      */
     function mintTokens(address to, uint256 amount) private {
         token.mint(to, amount);
+    }
+
+    modifier equalLength(address[] beneficiaries, uint256[] balances) {
+        require(beneficiaries.length == balances.length);
+        _;
     }
 }
 

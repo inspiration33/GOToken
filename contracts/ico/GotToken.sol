@@ -4,7 +4,7 @@
  * @version 1.0
  * @author ParkinGO
  */
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/PausableToken.sol";
@@ -19,7 +19,7 @@ contract GotToken is CanReclaimToken, MintableToken, PausableToken {
     /**
      * @dev Constructor of GotToken that instantiates a new Mintable Pausable Token
      */
-    function GotToken() public {
+    constructor() public {
         // token should not be transferable until after all tokens have been issued
         paused = true;
     }
