@@ -19,9 +19,9 @@ import "./PGOMonthlyPresaleVault.sol";
 
 contract GotCrowdSale is Pausable, CanReclaimToken, ICOEngineInterface, KYCBase {
     /*** CONSTANTS ***/
-    uint256 public constant START_TIME = 1528794000;                     // 12 June 2018 09:00:00 GMT
-    uint256 public constant END_TIME = 1530003600;                       // 26 June 2018 09:00:00 GMT
-    uint256 public constant USD_PER_TOKEN = 75;                       // 0.75$
+    uint256 public constant START_TIME = 1529406000;                     // 19 June 2018 11:00:00 GMT
+    uint256 public constant END_TIME = 1530010800;                       // 26 June 2018 11:00:00 GMT
+    uint256 public constant USD_PER_TOKEN = 75;                          // 0.75$
     uint256 public constant USD_PER_ETHER = 60000;
 
     //Token allocation

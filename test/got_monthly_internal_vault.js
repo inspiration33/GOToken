@@ -1,4 +1,4 @@
-import {expectThrow, waitNDays, getEvents, BigNumber, increaseTimeTo} from './helpers/tools';
+import {expectThrow, waitNDays, BigNumber, increaseTimeTo} from './helpers/tools';
 import {logger as log} from "./helpers/logger";
 
 const GotCrowdSale = artifacts.require('./GotCrowdSale.sol');
@@ -10,7 +10,7 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-const VAULT_START_TIME = 1530003801;      // 26 June 2018 09:00:00 GMT
+const VAULT_START_TIME = 1530010801;      // 26 June 2018 11:00:00 GMT
 
 contract('PGOMonthlyInternalVault',(accounts) => {
     const beneficiary1 = accounts[6];
@@ -29,7 +29,7 @@ contract('PGOMonthlyInternalVault',(accounts) => {
     });
 
     it('should check investment data with deployed one', async () => {
-        let investor = await pgoMonthlyInternalVaultInstance.getInvestment(0);
+        let investor = await pgoMonthlyInternalVaultInstance.getInvestment(beneficiary1);
         investor[0].should.be.equal(beneficiary1);
         investor[1].should.be.bignumber.equal(beneficiary1_balance);
         investor[2].should.be.bignumber.equal(new BigNumber(0));

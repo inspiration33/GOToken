@@ -35,10 +35,12 @@ contract PGOMonthlyInternalVault {
     uint256 public end;
     uint256 public cliff;
 
-    Investment[] public investments;
+    //Investment[] public investments;
 
     // key: investor address; value: index in investments array.
-    mapping(address => uint256) public investorLUT;
+    //mapping(address => uint256) public investorLUT;
+
+    mapping(address => Investment) public investments;
 
     /**
      * @dev Function to be fired by the initPGOMonthlyInternalVault function from the GotCrowdSale contract to set the
@@ -61,8 +63,7 @@ contract PGOMonthlyInternalVault {
         token = GotToken(_token);
 
         for (uint256 i = 0; i < beneficiaries.length; i = i.add(1)) {
-            investorLUT[beneficiaries[i]] = investments.length;
-            investments.push(Investment(beneficiaries[i], balances[i], 0));
+            investments[beneficiaries[i]] = Investment(beneficiaries[i], balances[i], 0);
         }
     }
 
@@ -74,8 +75,7 @@ contract PGOMonthlyInternalVault {
         uint256 unreleased = releasableAmount(beneficiary);
         require(unreleased > 0);
 
-        uint256 investmentIndex = investorLUT[beneficiary];
-        investments[investmentIndex].released = investments[investmentIndex].released.add(unreleased);
+        investments[beneficiary].released = investments[beneficiary].released.add(unreleased);
         token.safeTransfer(beneficiary, unreleased);
     }
 
@@ -88,10 +88,14 @@ contract PGOMonthlyInternalVault {
 
     /**
      * @dev Allows to check an investment.
-     * @param index The index of investment to check.
+     * @param beneficiary The address of the beneficiary of the investment to check.
      */
-    function getInvestment(uint256 index) public view returns(address, uint256, uint256) {
-        return (investments[index].beneficiary,investments[index].totalBalance,investments[index].released);
+    function getInvestment(address beneficiary) public view returns(address, uint256, uint256) {
+        return (
+            investments[beneficiary].beneficiary,
+            investments[beneficiary].totalBalance,
+            investments[beneficiary].released
+        );
     }
 
     /**
@@ -99,9 +103,7 @@ contract PGOMonthlyInternalVault {
      * @param beneficiary The address that will receive the vested tokens.
      */
     function releasableAmount(address beneficiary) public view returns (uint256) {
-        uint256 investmentIndex = investorLUT[beneficiary];
-
-        return vestedAmount(beneficiary).sub(investments[investmentIndex].released);
+        return vestedAmount(beneficiary).sub(investments[beneficiary].released);
     }
 
     /**
@@ -109,11 +111,10 @@ contract PGOMonthlyInternalVault {
      * @param beneficiary The address that will receive the vested tokens.
      */
     function vestedAmount(address beneficiary) public view returns (uint256) {
-        uint256 investmentIndex = investorLUT[beneficiary];
         uint256 vested = 0;
         if (block.timestamp >= cliff && block.timestamp < end) {
             // after cliff -> 1/21 of totalBalance every month, must skip first 3 months
-            uint256 totalBalance = investments[investmentIndex].totalBalance;
+            uint256 totalBalance = investments[beneficiary].totalBalance;
             uint256 monthlyBalance = totalBalance.div(VESTING_DIV_RATE);
             uint256 time = block.timestamp.sub(cliff);
             uint256 elapsedOffsets = time.div(VESTING_INTERVAL);
@@ -122,7 +123,7 @@ contract PGOMonthlyInternalVault {
         }
         if (block.timestamp >= end) {
             // after end -> all vested
-            vested = investments[investmentIndex].totalBalance;
+            vested = investments[beneficiary].totalBalance;
         }
         return vested;
     }

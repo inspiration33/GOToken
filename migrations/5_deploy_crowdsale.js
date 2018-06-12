@@ -8,7 +8,7 @@ module.exports = function(deployer, network, accounts) {
     let unlockedLiquidityWallet = accounts[8];
     let wallet = accounts[7];
 
-    if ( network === "ropsten") {
+    if (network === "ropsten") {
         internalReserveWallet = '0x7eA91A18B73569103fc8391356E03C03AEdDd215';
         unlockedLiquidityWallet = '0xB635fBa8569606d67922498e27B4095644FF4aEe';
         wallet = '0xdc09d15e4269c373e75614Eed7bddf65d24a8731';

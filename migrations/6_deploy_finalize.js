@@ -3,7 +3,13 @@ const BigNumber = web3.BigNumber;
 const Got = artifacts.require("./GotToken.sol");
 const GotCrowdSale = artifacts.require("./GotCrowdSale.sol");
 
+/*const reservationJson = require('../rc.json');
+
+const reservationAddresses = Object.keys(reservationJson);
+const reservationBalances = Object.values(reservationJson);*/
+
 module.exports = function(deployer, network, accounts) {
+
     let internalWallet = accounts[6];
     let presaleWallet = accounts[5];
     let reservationWallet = accounts[4];
@@ -25,6 +31,9 @@ module.exports = function(deployer, network, accounts) {
     //Initialize reservation addresses
     const reservationAddresses = [reservationWallet];
     const reservationBalances = [new BigNumber(0.8e7 * 1e18)];
+
+    //check that there are no duplicate addresses in reservationAddresses
+    //const reservationAddressesSet = new Set(reservationAddresses);
 
     let gotInstance;
     let gotCrowdSaleInstance;
