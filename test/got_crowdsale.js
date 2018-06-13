@@ -316,6 +316,7 @@ contract('GotCrowdSale',(accounts) => {
         await gotCrowdSaleInstance.buyTokens(d.id, d.max, d.v, d.r, d.s, {from: activeInvestor2, value: INVESTOR2_WEI2});
 
         const capReached = await gotCrowdSaleInstance.capReached();
+        console.log(capReached);
 
         await expectThrow(gotCrowdSaleInstance.buyTokens(d.id, d.max, d.v, d.r, d.s, {from: activeInvestor2, value: INVESTOR2_WEI}));
 
