@@ -92,25 +92,25 @@ contract('GotCrowdSale',(accounts) => {
         const reservationAddresses = [reservationWallet];
         const reservationBalances = [new BigNumber(0.7e7 * 1e18), new BigNumber(0.1e7 * 1e18)];
 
-        // await expectThrow(gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances));
-        // await expectThrow(gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances));
+        await expectThrow(gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances));
+        await expectThrow(gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances));
         await expectThrow(gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances));
     });
 
     it('should mint the reservation correctly', async () => {
         const internalAddresses = [internalWallet];
-        const internalBalances = [new BigNumber(2.1e7 * 1e18)];
+        const internalBalances = [new BigNumber(2.5e7 * 1e18)];
         const presaleAddresses = [presaleWallet];
         const presaleBalances = [new BigNumber(1.35e7 * 1e18)];
         const reservationAddresses = [reservationWallet];
-        const reservationBalances = [new BigNumber(0.8e7 * 1e18)];
-        const reservationBalances2 = [new BigNumber(0.075e7 * 1e18)];
+        const reservationBalances = [new BigNumber(0.875e7 * 1e18)];
+        //const reservationBalances2 = [new BigNumber(0.075e7 * 1e18)];
 
-        // await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
-        // await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
-         await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances);
-        await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances2);
-        await expectThrow(gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances));
+        await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
+        await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
+        await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances);
+        //await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances2);
+        //await expectThrow(gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances));
         //await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
     });
 
