@@ -1,9 +1,12 @@
 import {expectThrow, BigNumber, increaseTimeTo} from './helpers/tools';
 import {logger} from "./helpers/logger";
 
+
 const {ecsign} = require('ethereumjs-util');
 const abi = require('ethereumjs-abi');
 const BN = require('bn.js');
+//const Web3 = require("web3");
+//const web3 = new Web3();
 
 const GotCrowdSale = artifacts.require('./GotCrowdSale.sol');
 const GotToken = artifacts.require('./GotToken.sol');
@@ -64,6 +67,9 @@ contract('GotCrowdSale',(accounts) => {
     const activeInvestor1 = accounts[1];
     const activeInvestor2 = accounts[2];
     const activeInvestor3 = accounts[3];
+    const reservationWallet = accounts[4];
+    const presaleWallet = accounts[5];
+    const internalWallet = accounts[6];
     const wallet = accounts[7];
     const unlockedLiquidityWallet = accounts[8];
     const internalReserveWallet = accounts[9];
@@ -76,6 +82,36 @@ contract('GotCrowdSale',(accounts) => {
         gotCrowdSaleInstance = await GotCrowdSale.deployed();
         const gotTokenAddress = await gotCrowdSaleInstance.token();
         gotTokenInstance = await GotToken.at(gotTokenAddress);
+    });
+
+    it('should fail, address and balances should have same length', async () => {
+        const internalAddresses = [internalWallet];
+        const internalBalances = [new BigNumber(2.4e7 * 1e18), new BigNumber(0.1e7 * 1e18)];
+        const presaleAddresses = [presaleWallet];
+        const presaleBalances = [new BigNumber(1.30e7 * 1e18), new BigNumber(0.05e7 * 1e18)];
+        const reservationAddresses = [reservationWallet];
+        const reservationBalances = [new BigNumber(0.7e7 * 1e18), new BigNumber(0.1e7 * 1e18)];
+
+        // await expectThrow(gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances));
+        // await expectThrow(gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances));
+        await expectThrow(gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances));
+    });
+
+    it('should mint the reservation correctly', async () => {
+        const internalAddresses = [internalWallet];
+        const internalBalances = [new BigNumber(2.1e7 * 1e18)];
+        const presaleAddresses = [presaleWallet];
+        const presaleBalances = [new BigNumber(1.35e7 * 1e18)];
+        const reservationAddresses = [reservationWallet];
+        const reservationBalances = [new BigNumber(0.8e7 * 1e18)];
+        const reservationBalances2 = [new BigNumber(0.075e7 * 1e18)];
+
+        // await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
+        // await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
+         await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances);
+        await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances2);
+        await expectThrow(gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances));
+        //await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
     });
 
     it('should have token ownership', async () => {
@@ -116,7 +152,7 @@ contract('GotCrowdSale',(accounts) => {
         internalReserveCap.should.be.bignumber.equal(PGO_VAULT_CAP);
         reservedPresaleCap.should.be.bignumber.equal(PRESALE_VAULT_CAP);
         reservationCap.should.be.bignumber.equal(RESERVATION_CAP);
-        tokensSold.should.be.bignumber.below(RESERVATION_CAP);
+        tokensSold.should.be.bignumber.equal(RESERVATION_CAP);
         //remaining tokens should be equal to CROWDSALE_CAP - RC (11500000 - 8000000 = 3500000)
         remainingTokens.should.be.bignumber.equal(CROWDSALE_CAP.sub(tokensSold));
     });
@@ -203,13 +239,17 @@ contract('GotCrowdSale',(accounts) => {
         totalSupply.should.be.bignumber.equal(TOTAL_SUPPLY);
     });
 
+    it('should use KYCBase buyTokens implementation to transfer ether to the contract and revert other methods', async () => {
+        await expectThrow(web3.eth.sendTransaction({from: activeInvestor1, to: gotCrowdSaleInstance.address, value: web3.toWei(0.05, "ether")}));
+    });
+
     it('should buyTokens', async () => {
         const price = await gotCrowdSaleInstance.price();
         const activeInvestorBalance1 = await gotTokenInstance.balanceOf(activeInvestor1);
         const totalSupply1 = await gotTokenInstance.totalSupply();
 
         const d = getKycData(activeInvestor1, 1, gotCrowdSaleInstance.address, SIGNER_PK);
-        gotCrowdSaleInstance.buyTokens(d.id, d.max, d.v, d.r, d.s, {from: activeInvestor1, value: INVESTOR1_WEI});
+        await gotCrowdSaleInstance.buyTokens(d.id, d.max, d.v, d.r, d.s, {from: activeInvestor1, value: INVESTOR1_WEI});
 
         const activeInvestorBalance2 = await gotTokenInstance.balanceOf(activeInvestor1);
         const totalSupply2 = await gotTokenInstance.totalSupply();
@@ -221,6 +261,20 @@ contract('GotCrowdSale',(accounts) => {
         //may add the amount of tokens the investor1 should have as a global const and add it to totalSupply1
         totalSupply2.should.not.be.bignumber.equal(totalSupply1);
         //may add remaining tokens check as ICO SUPPLY - token.balanceOf(activeInbestorBalance)
+    });
+
+    it('should be possible to buy tokens for another account', async () => {
+        const activeInvestorBalance1 = await gotTokenInstance.balanceOf(activeInvestor2);
+        const totalSupply1 = await gotTokenInstance.totalSupply();
+
+        const d = getKycData(activeInvestor2, 2, gotCrowdSaleInstance.address, SIGNER_PK);
+        await gotCrowdSaleInstance.buyTokensFor(activeInvestor2, d.id, d.max, d.v, d.r, d.s, {from: activeInvestor1, value: INVESTOR1_WEI});
+
+        const activeInvestorBalance2 = await gotTokenInstance.balanceOf(activeInvestor2);
+        const totalSupply2 = await gotTokenInstance.totalSupply();
+
+        activeInvestorBalance2.should.not.be.bignumber.equal(activeInvestorBalance1);
+        totalSupply2.should.not.be.bignumber.equal(totalSupply1);
     });
 
     it('should be possible to pause the crowdsale by the owner', async () => {
@@ -236,7 +290,7 @@ contract('GotCrowdSale',(accounts) => {
         const activeInvestor2Balance = await gotTokenInstance.balanceOf(activeInvestor2);
 
         assert.isTrue(paused);
-        activeInvestor2Balance.should.be.bignumber.lessThan(100);
+        //activeInvestor2Balance.should.be.bignumber.lessThan(800000000000000000000);
     });
 
     it('should be possible to unpause the crowdsale by the owner', async () => {
@@ -278,7 +332,6 @@ contract('GotCrowdSale',(accounts) => {
         activeInvestor3Balance.should.be.bignumber.equal(0);
         //modify to make it equal to investor1_token_amount
         activeInvestor1Balance.should.not.be.equal(0);
-
     });
 
     it('should call closeCrowdsale only from the owner', async () => {

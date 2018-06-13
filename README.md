@@ -182,9 +182,9 @@ Fill in the following data.
 ```
 Contract Address:       <CONTRACT_ADDRESS>
 Contract Name:          <CONTRACT_NAME>
-Compiler:               v0.4.19+commit.c4cbbb05
+Compiler:               0.4.24+commit.e67f0147
 Optimization:           YES
-Solidity Contract Code: <Copy & Paste from ./build/bundle/IcoCrowdsale_all.sol>
+Solidity Contract Code: <Copy & Paste from ./build/bundle/GotCrowdSale_all.sol>
 Constructor Arguments:  <ABI from deployment output>
 ```
 Visit [Solc version number](https://github.com/ethereum/solc-bin/tree/gh-pages/bin) page for determining the correct version number for your project.

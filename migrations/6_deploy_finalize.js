@@ -50,9 +50,9 @@ module.exports = function(deployer, network, accounts) {
                         console.log('[ Initialized internal vault]');
                         gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances).then(() => {
                             console.log('[ Initialized presale vault]');
-                            gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances).then(() => {
-                                console.log('[ Minted presale second step]');
-                            });
+                            //gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances).then(() => {
+                            //    console.log('[ Minted presale second step]');
+                            //});
                         });
                     });
                 });
