@@ -9,9 +9,9 @@
 6. Call the function in the crowdsale that mints the pre-allocated locked and unlocked liquidity funds `gotCrowdsaleInstance.mintPreAllocatedTokens()`
 7. Set the tokens for founders, advisors, teams and partners investments in the crowdsale by calling `gotCrowdSaleInstance.initPGOMonthlyInternalVault(beneficiaries, balances)`
 8. Set the tokens for private presales in the crowdsale by calling `gotCrowdSaleInstance.initPGOMonthlyPresaleVault(beneficiaries, balances)`
-9. Call the function in the crowdsale that mints the second presale phase (reservation contract) in the crowdsale by calling `gotCrowdSaleInstance.mintReservation(beneficiaries, balances)`
+9. Call the function in the crowdsale that mints the reservation phase in the crowdsale by calling `gotCrowdSaleInstance.mintReservation(beneficiaries, balances)`
 
-## During the Reservation & Crowdsale phases
+## During the Crowdsale phase
 ###### Callable by the owner only:
 * Pause/unpause the sales in case of an emergency:
     - `gotCrowdSaleInstance.pause()`, `gotCrowdSaleInstance.unpause()`
@@ -29,9 +29,9 @@
 
   The ownership of the GotToken contract will be transferred to the Crowdsale contract's owner.
 
-###### Reservation contract phase
-* The Reservation contract phase is intended to be part of the ICO phase and so it is entirely managed inside the `GotCrowdSale.sol` contract.
-* The `gotCrowdSaleInstance.mintReservation(beneficiary, balances)` does not instantiate an external contract, but it directly manages the vesting of tokens to the RC investors.
+###### Reservation phase
+* The Reservation phase is intended to start off-chain by accounting the addresses of the investors and their reserved GOTokens.
+* The reserved tokens will be distributed at the start of the ICO phase via the function `gotCrowdSaleInstance.mintReservation(beneficiary, balances)` in the `GotCrowdSale.sol` contract.
 
 ## Vesting phases
 * Presale investor can claim the vested tokens by calling `pgoMonthlyPresaleVault.release()`.  
@@ -51,10 +51,11 @@ Tokens can be transferred by a sender to the beneficiary's address, when calling
 * Reclaimable token: allows the owner to recover any ERC20 token received. During the crowdsale period, the owner of the token is the crowdsale contract, therefore, it is convenient to reclaim tokens after the crowdsale has ended.
 
 ###### Crowdsale
-* Start time: Epoch timestamp: 1528794000 (12 June 2018 09:00:00 GMT).
-* End time: Epoch timestamp: 1530003600 (26 June 2018 09:00:00 GMT).
+* Start time: Epoch timestamp: 1529406000 (19 June 2018 11:00:00 GMT).
+* End time: Epoch timestamp: 1530003600 (26 June 2018 11:00:00 GMT).
 * Price: USD 0.75 per token.
-* Hard cap: 11.500.000 GOT tokens.
+* Soft Cap: 2.000.000 USD.
+* Hard cap: 12.000.000 USD.
 * Pausable: owner is able to pause (and unpause) the crowdsale phase.
 * Reclaimable token: allows the owner to recover any ERC20 token received.
 * Paused until ICO end epoch time.
@@ -68,31 +69,15 @@ https://github.com/eidoo/icoengine/blob/master/contracts/ICOEngineInterface.sol
 https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
 
 ###### Token allocation
-* Business fund
+* Internal Reserve fund
+    * Mentioned as PGO Vault in the code.
     * 35.000.000 tokens.
-    * ¼ tokens unlocked 12 months after the end of ICO.
-    * remaining ¾ unlocked 18, 24 and 30 months after the end of ICO.
+    * ¼ tokens unlocked 360 days after the end of ICO.
+    * remaining ¾ unlocked 540, 720 and 900 days after the end of ICO.
     
 * Unlocked liquidity
     * 15.000.000 tokens.
     * Can be used for bounty programs and airdrop.
-
-* Family Pre-sale
-    * Already finished.
-    * List of Presale investors wallet with GOT amount.
-    * 13.500.000 tokens.
-    * 1⁄3 tokens unlocked right after the end of ICO.
-    * Continuous vesting of remaining 2⁄3 tokens: starts 3 months after the end of ICO
-    and ends 21 months later.
-    * 60% Discount
-    * 1 token = 0.30 usd
-
- * Partners Pre-sale
-    * Already finished.
-    * List of Presale investors wallet with GOT amount.
-    * 10.000.000 tokens.
-    * Continuous vesting: starts 3 months after the end of ICO and ends 21 months
-    later.
 
 * Founders
     * 10.000.000 tokens assigned to a unique wallet address.
@@ -105,15 +90,32 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
     * Continuous vesting: starts 3 months after the end of ICO and ends 21 months
     later.
 
-* Reservation contract
-    * 8.750.000 tokens.
-    * 20% discount
-    * Private invitation only
-    * Require previous KYC Eidoo verification
+* Partners Pre-sale
+    * Already finished.
+    * List of Presale investors wallet with GOT amount.
+    * 13.500.000 tokens.
+    * Continuous vesting: starts 3 months after the end of ICO and ends 21 months
+    later.
+
+* Reserved Pre-sale
+    * Already finished.
+    * List of Presale investors wallet with GOT amount.
+    * 15.683.388 tokens.
+    * 1⁄3 tokens unlocked right after the end of ICO.
+    * Continuous vesting of remaining 2⁄3 tokens: starts 3 months after the end of ICO
+    and ends 21 months later.
+    * 60% Discount
+    * 1 token = 0.30 usd
+
+* Reservation phase
+    * 4.316.612 tokens.
+    * 5%, 10% or 20% discount, depending on discount code applied.
+    * 10% and 20% only with private invitation.
+    * Require previous KYC verification.
 
 * Public ICO
-    * 2.750.000 tokens plus all not sold during Reservation contract phase
-    * 1 Token = 0.75 usd
+    * 1.500.000 tokens plus all not sold during Reservation phase.
+    * 1 Token = 0.75 usd.
 
 
 ## Requirements
@@ -167,7 +169,7 @@ truffle compile
 truffle migrate
 
 # Test the contract
-ganache-cli --defaultBalanceEther 8000000000000000000000 --port 7545
+ganache-cli --defaultBalanceEther 8000000 --port 7545
 truffle test `./test/testfilename`
 ```
 
@@ -182,9 +184,9 @@ Fill in the following data.
 ```
 Contract Address:       <CONTRACT_ADDRESS>
 Contract Name:          <CONTRACT_NAME>
-Compiler:               v0.4.19+commit.c4cbbb05
+Compiler:               0.4.24+commit.e67f0147
 Optimization:           YES
-Solidity Contract Code: <Copy & Paste from ./build/bundle/IcoCrowdsale_all.sol>
+Solidity Contract Code: <Copy & Paste from ./build/bundle/GotCrowdSale_all.sol>
 Constructor Arguments:  <ABI from deployment output>
 ```
 Visit [Solc version number](https://github.com/ethereum/solc-bin/tree/gh-pages/bin) page for determining the correct version number for your project.

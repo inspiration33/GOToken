@@ -6,7 +6,7 @@
  * @author ParkinGo
  */
 
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 import "../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
@@ -36,6 +36,7 @@ contract PGOVault {
     GotToken public token;
     uint256 public start;
     uint256 public released;
+    uint256 public vestingOffsetsLength = vesting_offsets.length;
 
     /**
      * @dev Constructor.
@@ -43,7 +44,7 @@ contract PGOVault {
      * @param _token The GOT Token, which is being vested.
      * @param _start The start time from which each release time will be calculated.
      */
-    function PGOVault(
+    constructor(
         address _pgoWallet,
         address _token,
         uint256 _start
@@ -79,7 +80,7 @@ contract PGOVault {
      */
     function vestedAmount() public view returns (uint256) {
         uint256 vested = 0;
-        for (uint256 i = 0; i < vesting_offsets.length; i = i.add(1)) {
+        for (uint256 i = 0; i < vestingOffsetsLength; i = i.add(1)) {
             if (block.timestamp > start.add(vesting_offsets[i])) {
                 vested = vested.add(vesting_amounts[i]);
             }
@@ -92,7 +93,7 @@ contract PGOVault {
      */
     function unreleasedAmount() public view returns (uint256) {
         uint256 unreleased = 0;
-        for (uint256 i = 0; i < vesting_offsets.length; i = i.add(1)) {
+        for (uint256 i = 0; i < vestingOffsetsLength; i = i.add(1)) {
             unreleased = unreleased.add(vesting_amounts[i]);
         }
         return unreleased.sub(released);

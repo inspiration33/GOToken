@@ -1,4 +1,4 @@
-import {expectThrow, getEvents, BigNumber} from './helpers/tools';
+import {expectThrow, BigNumber} from './helpers/tools';
 import {logger} from "./helpers/logger";
 
 const should = require('chai') // eslint-disable-line
@@ -9,10 +9,8 @@ const should = require('chai') // eslint-disable-line
 const GotToken = artifacts.require('GotToken');
 
 contract('GotToken',(accounts) => {
-    const owner = accounts[0];
     const tokenHolder1 = accounts[1];
     const tokenHolder2 = accounts[2];
-    const tokenHolder3 = accounts[3];
 
     // Provide gotTokenInstance for every test case
     let gotTokenInstance;

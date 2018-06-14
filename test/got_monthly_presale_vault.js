@@ -1,4 +1,4 @@
-import {expectThrow, waitNDays, getEvents, BigNumber, increaseTimeTo} from './helpers/tools';
+import {waitNDays, BigNumber, increaseTimeTo} from './helpers/tools';
 import {logger as log} from "./helpers/logger";
 
 const GotCrowdSale = artifacts.require('./GotCrowdSale.sol');
@@ -10,11 +10,11 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-const VAULT_START_TIME = 1530003601;      // 26 June 2018 09:00:00 GMT
+const VAULT_START_TIME = 1530010801;      // 26 June 2018 11:00:00 GMT
 
 contract('PGOMonthlyPresaleVault',(accounts) => {
     const beneficiary1 = accounts[5];
-    const beneficiary1_balance = new BigNumber(1.35e7 * 1e18);
+    const beneficiary1_balance = new BigNumber(1.5683388e7 * 1e18);
 
     // Provide gotTokenInstance for every test case
     let gotCrowdSaleInstance;
@@ -27,6 +27,19 @@ contract('PGOMonthlyPresaleVault',(accounts) => {
         gotTokenAddress = await gotCrowdSaleInstance.token();
         gotTokenInstance = await GotToken.at(gotTokenAddress);
         pgoMonthlyPresaleVaultInstance = await PGOMonthlyPresaleVault.deployed();
+    });
+
+    it('should init the vaults and mint the reservation correctly', async () => {
+        const internalAddresses = [accounts[6]];
+        const internalBalances = [new BigNumber(2.85e7 * 1e18)];
+        const presaleAddresses = [accounts[5]];
+        const presaleBalances = [new BigNumber(1.5683388e7 * 1e18)];
+        const reservationAddresses = [accounts[4]];
+        const reservationBalances = [new BigNumber(0.4316612e7 * 1e18)];
+
+        await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
+        await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
+        await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances);
     });
 
     it('should increase time to ICO END', async () => {
@@ -94,6 +107,21 @@ contract('PGOMonthlyPresaleVault',(accounts) => {
 
         let div21BeneficiaryBalance = beneficiary1_balance.mul(2).div(3).div(21);
         div21BeneficiaryBalance = div21BeneficiaryBalance.mul(2);
+        const initial33percentBalance = beneficiary1_balance.div(3);
+
+        beneficiary1Balance.should.be.bignumber.equal(div21BeneficiaryBalance.add(initial33percentBalance));
+    });
+
+    it('should check 3/21 of token are unlocked after 6 months by calling .release() from an external address', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await waitNDays(30);
+        await pgoMonthlyPresaleVaultInstance.contract.release['']({from: beneficiary1});
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
+
+        let div21BeneficiaryBalance = beneficiary1_balance.mul(2).div(3).div(21);
+        div21BeneficiaryBalance = div21BeneficiaryBalance.mul(3);
         const initial33percentBalance = beneficiary1_balance.div(3);
 
         beneficiary1Balance.should.be.bignumber.equal(div21BeneficiaryBalance.add(initial33percentBalance));

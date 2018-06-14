@@ -2,15 +2,19 @@ const BigNumber = web3.BigNumber;
 
 const Got = artifacts.require("./GotToken.sol");
 const GotCrowdSale = artifacts.require("./GotCrowdSale.sol");
-const PGOMonthlyInternalVault = artifacts.require("./PGOMonthlyInternalVault.sol");
-const PGOMonthlyPresaleVault = artifacts.require("./PGOMonthlyPresaleVault.sol");
+
+/*const reservationJson = require('../rc.json');
+
+const reservationAddresses = Object.keys(reservationJson);
+const reservationBalances = Object.values(reservationJson);*/
 
 module.exports = function(deployer, network, accounts) {
+
     let internalWallet = accounts[6];
     let presaleWallet = accounts[5];
     let reservationWallet = accounts[4];
 
-    if ( network == "ropsten") {
+    if ( network === "ropsten") {
         internalWallet = '0x40a0a75255DBaa2b232d11241E74743354F3D583';
         presaleWallet = '0xe71E9931137A90CD2A98D71306cC2F5Bc5F801F3';
         reservationWallet = '0x57B6A3C4143A087A8d9deb6AAab67bA9D255eBBC';
@@ -28,6 +32,9 @@ module.exports = function(deployer, network, accounts) {
     const reservationAddresses = [reservationWallet];
     const reservationBalances = [new BigNumber(0.8e7 * 1e18)];
 
+    //check that there are no duplicate addresses in reservationAddresses
+    //const reservationAddressesSet = new Set(reservationAddresses);
+
     let gotInstance;
     let gotCrowdSaleInstance;
     //load contract instances
@@ -38,16 +45,18 @@ module.exports = function(deployer, network, accounts) {
             gotInstance.transferOwnership(GotCrowdSale.address).then(() => {
                 console.log('[ Token ownership transferred to] '+ GotCrowdSale.address);
                 gotCrowdSaleInstance.mintPreAllocatedTokens().then(() => {
-                    console.log('[ UnlockedLiquidity minted, LockedLiquidity moved to PGOVAULT]');
-                    gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances).then(() => {
-                        console.log('[ Initialized internal vault]');
-                        gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances).then(() => {
-                            console.log('[ Initialized presale vault]');
-                            gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances).then(() => {
-                                console.log('[ Minted presale second step]');
+                    console.log('[ UnlockedLiquidity minted, Internal reserve moved to PGOVAULT]');
+                    if (network === "ropsten") {
+                        gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances).then(() => {
+                            console.log('[ Initialized internal vault]');
+                            gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances).then(() => {
+                                console.log('[ Initialized presale vault]');
+                                gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances).then(() => {
+                                    console.log('[ Minted presale second step]');
+                                });
                             });
                         });
-                    });
+                    }
                 });
             });
         });

@@ -1,6 +1,5 @@
-import {expectThrow, BigNumber, increaseTimeTo} from './helpers/tools';
-import {logger} from "./helpers/logger";
-
+import {expectThrow, BigNumber, increaseTimeTo, waitNDays} from './helpers/tools';
+import {logger as log, logger} from "./helpers/logger";
 
 const {ecsign} = require('ethereumjs-util');
 const abi = require('ethereumjs-abi');
@@ -8,8 +7,11 @@ const BN = require('bn.js');
 
 const GotCrowdSale = artifacts.require('./GotCrowdSale.sol');
 const GotToken = artifacts.require('./GotToken.sol');
+const PGOMonthlyInternalVault = artifacts.require('./PGOMonthlyInternalVault.sol');
+const PGOMonthlyPresaleVault = artifacts.require('./PGOMonthlyPresaleVault.sol');
+const PGOVault = artifacts.require('./PGOVault.sol');
 
-const should = require('chai') // eslint-disable-line
+const should = require('chai')
     .use(require('chai-as-promised'))
     .use(require('chai-bignumber')(BigNumber))
     .should();
@@ -36,10 +38,11 @@ const getKycData = (userAddr, userid, icoAddr, pk) => {
 
 const CROWDSALE_START_TIME = 1529406000;                                    // 19 June 2018 11:00:00 GMT
 const CROWDSALE_END_TIME = 1530010800;                                      // 26 June 2018 11:00:00 GMT
+const VAULT_START_TIME = 1530010801;                                        // 26 June 2018 11:00:01 GMT
 
 
 const USD_PER_TOKEN = 0.75;
-const USD_PER_ETHER = 600;
+const USD_PER_ETHER = 600;                                                  // REMEMBER TO CHANGE IT AT ICO START
 const TOKEN_PER_ETHER =  USD_PER_ETHER / USD_PER_TOKEN;                     // 700 GOT tokens per ether
 
 /*INVESTORS DATA*/
@@ -59,6 +62,10 @@ const CROWDSALE_CAP = new BigNumber(0.5816612e7 * 1e18);
 const RESERVATION_CAP = new BigNumber(0.4316612e7 * 1e18);
 const TOTAL_SUPPLY = new BigNumber(10e7 * 1e18);
 
+const PGO_VAULT_STEP1 = new BigNumber(0.875e7 * 1e18);
+const PGO_VAULT_STEP2 = new BigNumber(1.75e7 * 1e18);
+const PGO_VAULT_STEP3 = new BigNumber(2.625e7 * 1e18);
+const PGO_VAULT_STEP4 = new BigNumber(3.5e7 * 1e18);
 
 contract('GotCrowdSale',(accounts) => {
     const owner = accounts[0];
@@ -72,15 +79,49 @@ contract('GotCrowdSale',(accounts) => {
     const unlockedLiquidityWallet = accounts[8];
     const internalReserveWallet = accounts[9];
 
+    //const reservationWalletBalance = RESERVATION_CAP;
+    const presaleWalletBalance = PRESALE_VAULT_CAP;
+    const internalWalletBalance = INTERNAL_VAULT_CAP;
+
     // Provide gotTokenInstance for every test case
     let gotTokenInstance;
     let gotCrowdSaleInstance;
+    let pgoMonthlyInternalVaultInstance;
+    let pgoMonthlyPresaleVaultInstance;
+    let pgoVaultInstance;
+    let pgoVaultAddress;
+    let gotTokenAddress;
 
     beforeEach(async () => {
         gotCrowdSaleInstance = await GotCrowdSale.deployed();
-        const gotTokenAddress = await gotCrowdSaleInstance.token();
+        gotTokenAddress = await gotCrowdSaleInstance.token();
+        pgoVaultAddress = await gotCrowdSaleInstance.pgoVault();
         gotTokenInstance = await GotToken.at(gotTokenAddress);
+        pgoVaultInstance = PGOVault.at(pgoVaultAddress);
+        pgoMonthlyInternalVaultInstance = await PGOMonthlyInternalVault.deployed();
+        pgoMonthlyPresaleVaultInstance = await PGOMonthlyPresaleVault.deployed();
     });
+
+    /* GOTOKEN */
+
+    it('should instantiate the ICO token correctly', async () => {
+        const name = await gotTokenInstance.name();
+        const symbol = await gotTokenInstance.symbol();
+        const decimals = await gotTokenInstance.decimals();
+
+        name.should.equal('GOToken');
+        symbol.should.equal('GOT');
+        decimals.should.be.bignumber.equal(18, 'Decimals does not match');
+    });
+
+    it('should fail, token can not be transferrable while on paused mode', async () => {
+        await expectThrow(gotTokenInstance.transfer(activeInvestor2, 1, {from: activeInvestor1}));
+
+        const balanceTokenHolder2 = await gotTokenInstance.balanceOf(activeInvestor2);
+        balanceTokenHolder2.should.be.bignumber.equal(0);
+    });
+
+    /* CROWDSALE */
 
     it('should fail, address and balances should have same length', async () => {
         const internalAddresses = [internalWallet];
@@ -239,11 +280,11 @@ contract('GotCrowdSale',(accounts) => {
         const totalSupply = totalMintedSupply.add(remainingTokens);
 
         totalMintedSupply.should.be.bignumber.equal(
-            internalVaultBalance        // 25mil
-            .plus(presaleVaultBalance)  // 13.5 mil
-            .plus(pgoVaultBalance)      // 35 mil
-            .plus(unlockedLiquidity)    // 15 mil
-            .plus(tokensSold)           // 8 mil
+            internalVaultBalance            // 28.5 mil
+                .plus(presaleVaultBalance)  // 15.6833388 mil
+                .plus(pgoVaultBalance)      // 35 mil
+                .plus(unlockedLiquidity)    // 15 mil
+                .plus(tokensSold)           // 5.316612 mil
         );
 
         totalSupply.should.be.bignumber.equal(TOTAL_SUPPLY);
@@ -306,7 +347,7 @@ contract('GotCrowdSale',(accounts) => {
         const activeInvestor2Balance = await gotTokenInstance.balanceOf(activeInvestor2);
 
         assert.isTrue(paused);
-        //activeInvestor2Balance.should.be.bignumber.lessThan(800000000000000000000);
+        activeInvestor2Balance.should.be.bignumber.lessThan(new BigNumber(801 * 1e18));
     });
 
     it('should be possible to unpause the crowdsale by the owner', async () => {
@@ -406,5 +447,299 @@ contract('GotCrowdSale',(accounts) => {
 
         activeInvestor1Balance1.should.not.be.bignumber.equal(activeInvestor1Balance2);
         activeInvestor3Balance1.should.not.be.bignumber.equal(activeInvestor3Balance2);
+    });
+
+    /* MONTHLY INTERNAL VAULT / MONTHLY PRESALE VAULT / PGO VAULT */
+
+    it('INTERNAL: should check investment data with deployed one', async () => {
+        let investor = await pgoMonthlyInternalVaultInstance.getInvestment(internalWallet);
+        investor[0].should.be.equal(internalWallet);
+        investor[1].should.be.bignumber.equal(internalWalletBalance);
+        investor[2].should.be.bignumber.equal(new BigNumber(0));
+    });
+
+    it('INTERNAL: should have vested pgo tokens', async () => {
+        const balance = await gotTokenInstance.balanceOf(pgoMonthlyInternalVaultInstance.address);
+        balance.should.be.bignumber.equal(internalWalletBalance);
+    });
+
+    it('PGOVAULT: should have unreleased amount equal to PGO_VAULT_CAP', async () => {
+        const balance = await pgoVaultInstance.unreleasedAmount();
+        balance.should.be.bignumber.equal(PGO_VAULT_CAP);
+    });
+
+    it('PGOVAULT: should initially have token amount equal to the internal reserve cap', async () => {
+        const internalReserveCap = await gotCrowdSaleInstance.PGO_INTERNAL_RESERVE_CAP();
+        const balance = await pgoVaultInstance.unreleasedAmount();
+        balance.should.be.bignumber.equal(internalReserveCap);
+    });
+
+    it('PGOVAULT: should have vested amount 0', async () => {
+        const vested = await pgoVaultInstance.vestedAmount();
+        vested.should.be.bignumber.equal(new BigNumber(0));
+    });
+
+    it('INTERNAL: should check unlocked tokens before 3 months are 0', async () => {
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(internalWallet);
+        let vaultBalance = await gotTokenInstance.balanceOf(pgoMonthlyInternalVaultInstance.address);
+
+        beneficiary1Balance.should.be.bignumber.equal(0);
+        vaultBalance.should.be.bignumber.equal(internalWalletBalance);
+
+        let vested = await pgoMonthlyInternalVaultInstance.vestedAmount(internalWallet);
+        vested.should.be.bignumber.equal(0);
+
+        //it will launch revert because releasable funds are 0
+        await expectThrow(pgoMonthlyInternalVaultInstance.release(internalWallet));
+    });
+
+    it('PRESALE: should check unlocked tokens before 3 months are 1/3', async () => {
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(presaleWallet);
+        let vaultBalance = await gotTokenInstance.balanceOf(pgoMonthlyPresaleVaultInstance.address);
+
+        beneficiary1Balance.should.be.bignumber.equal(0);
+        vaultBalance.should.be.bignumber.equal(presaleWalletBalance);
+
+        const vested = await pgoMonthlyPresaleVaultInstance.vestedAmount(presaleWallet);
+        vested.should.be.bignumber.equal(presaleWalletBalance.div(3));
+
+        let releasable = await pgoMonthlyPresaleVaultInstance.releasableAmount(presaleWallet);
+        releasable.should.be.bignumber.equal(presaleWalletBalance.div(3));
+
+        await pgoMonthlyPresaleVaultInstance.release(presaleWallet);
+
+        releasable = await pgoMonthlyPresaleVaultInstance.releasableAmount(presaleWallet);
+        releasable.should.be.bignumber.equal(0);
+
+        beneficiary1Balance = await gotTokenInstance.balanceOf(presaleWallet);
+        vaultBalance = await gotTokenInstance.balanceOf(pgoMonthlyPresaleVaultInstance.address);
+
+        beneficiary1Balance.should.be.bignumber.equal(presaleWalletBalance.div(3));
+        vaultBalance.should.be.bignumber.equal(presaleWalletBalance.sub(presaleWalletBalance.div(3)));
+    });
+
+    it('INTERNAL: should check 1/21 of token are unlocked after 4 months', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await waitNDays(120);
+        await pgoMonthlyInternalVaultInstance.release(internalWallet);
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(internalWallet);
+        let div21BeneficiaryBalance = internalWalletBalance.dividedBy(21);
+
+        div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
+    });
+
+    it('PRESALE: should check 1/21 of token are unlocked after 4 months', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await pgoMonthlyPresaleVaultInstance.release(presaleWallet);
+
+        const beneficiary1Balance = await gotTokenInstance.balanceOf(presaleWallet);
+
+        log.info(beneficiary1Balance);
+
+        const div21BeneficiaryBalance = presaleWalletBalance.mul(2).div(3).div(21);
+        const initial33percentBalance = presaleWalletBalance.div(3);
+
+        beneficiary1Balance.should.be.bignumber.equal(div21BeneficiaryBalance.add(initial33percentBalance));
+    });
+
+    it('INTERNAL: should check 2/21 of token are unlocked after 5 months', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await waitNDays(30);
+        await pgoMonthlyInternalVaultInstance.release(internalWallet);
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(internalWallet);
+        let div21BeneficiaryBalance = internalWalletBalance.dividedBy(21);
+
+        div21BeneficiaryBalance = div21BeneficiaryBalance.mul(2);
+
+        div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
+    });
+
+    it('PRESALE: should check 2/21 of token are unlocked after 5 months', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await pgoMonthlyPresaleVaultInstance.release(presaleWallet);
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(presaleWallet);
+
+        log.info(beneficiary1Balance);
+
+        let div21BeneficiaryBalance = presaleWalletBalance.mul(2).div(3).div(21);
+        div21BeneficiaryBalance = div21BeneficiaryBalance.mul(2);
+        const initial33percentBalance = presaleWalletBalance.div(3);
+
+        beneficiary1Balance.should.be.bignumber.equal(div21BeneficiaryBalance.add(initial33percentBalance));
+    });
+
+    it('INTERNAL: should check 3/21 of token are unlocked after 6 months by calling .release() from an external address', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await waitNDays(30);
+        await pgoMonthlyInternalVaultInstance.contract.release[''].sendTransaction({from: internalWallet});
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(internalWallet);
+        let div21BeneficiaryBalance = internalWalletBalance.dividedBy(21);
+
+        div21BeneficiaryBalance = div21BeneficiaryBalance.mul(3);
+
+        div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
+    });
+
+    it('PRESALE: should check 3/21 of token are unlocked after 6 months by calling .release() from an external address', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await pgoMonthlyPresaleVaultInstance.contract.release[''].sendTransaction({from: presaleWallet});
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(presaleWallet);
+
+        let div21BeneficiaryBalance = presaleWalletBalance.mul(2).div(3).div(21);
+        div21BeneficiaryBalance = div21BeneficiaryBalance.mul(3);
+        const initial33percentBalance = presaleWalletBalance.div(3);
+
+        beneficiary1Balance.should.be.bignumber.equal(div21BeneficiaryBalance.add(initial33percentBalance));
+    });
+
+    it('PGOVAULT: should release internal reserve liquidity vested at step 1', async () => {
+        await waitNDays(181);
+
+        let internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        let vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.be.bignumber.equal(0);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP);
+
+        const vested = await pgoVaultInstance.vestedAmount();
+        vested.should.be.bignumber.equal(PGO_VAULT_STEP1);
+
+        await pgoVaultInstance.release();
+
+        internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.not.be.bignumber.equal(0);
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP1);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP - PGO_VAULT_STEP1);
+    });
+
+    it('PGOVAULT: should release internal reserve liquidity vested at step 2', async () => {
+        await waitNDays(180);
+
+        let internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        let vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP1);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP - PGO_VAULT_STEP1);
+
+        const vested = await pgoVaultInstance.vestedAmount();
+        vested.should.be.bignumber.equal(PGO_VAULT_STEP2);
+
+        await pgoVaultInstance.release();
+
+        internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.not.be.bignumber.equal(PGO_VAULT_STEP1);
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP2);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP - PGO_VAULT_STEP2);
+    });
+
+    it('PGOVAULT: should release internal reserve liquidity vested at step 3', async () => {
+        await waitNDays(180);
+
+        let internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        let vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP2);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP - PGO_VAULT_STEP2);
+
+        const vested = await pgoVaultInstance.vestedAmount();
+        vested.should.be.bignumber.equal(PGO_VAULT_STEP3);
+
+        await pgoVaultInstance.release();
+
+        internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP3);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP.minus(PGO_VAULT_STEP3));
+    });
+
+    it('PGOVAULT: should release internal reserve liquidity vested at step 4', async () => {
+        await waitNDays(180);
+
+        let internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        let vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP3);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP.minus(PGO_VAULT_STEP3));
+
+        const vested = await pgoVaultInstance.vestedAmount();
+        vested.should.be.bignumber.equal(PGO_VAULT_STEP4);
+
+        await pgoVaultInstance.release();
+
+        internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP4);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP - PGO_VAULT_STEP4);
+        vaultBalance.should.be.bignumber.equal(0);
+    });
+
+    it('PGOVAULT: should not not have any internal reserve liquidity left to release', async () => {
+        await waitNDays(40);
+
+        let internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        let vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP4);
+        vaultBalance.should.be.bignumber.equal(PGO_VAULT_CAP - PGO_VAULT_STEP4);
+
+        const vested = await pgoVaultInstance.vestedAmount();
+        vested.should.be.bignumber.equal(PGO_VAULT_STEP4);
+
+        await expectThrow(pgoVaultInstance.release());
+
+        internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
+        vaultBalance = await gotTokenInstance.balanceOf(pgoVaultAddress);
+
+        internalReserveWalletBalance.should.be.bignumber.equal(PGO_VAULT_STEP4);
+        vaultBalance.should.be.bignumber.equal(0);
+    });
+
+    it('PGOVAULT: should finally have vault token amount equal to 0', async () => {
+        const internalReserveCap = await gotCrowdSaleInstance.PGO_INTERNAL_RESERVE_CAP();
+        const balance = await pgoVaultInstance.unreleasedAmount();
+        balance.should.not.be.bignumber.equal(internalReserveCap);
+        balance.should.be.bignumber.equal(0);
+    });
+
+    it('INTERNAL: should release all token after vault end ', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        const days = 30*36;
+        const endTime = VAULT_START_TIME + (days * 24 * 60 * 60);
+
+        await increaseTimeTo(endTime);
+
+        await pgoMonthlyInternalVaultInstance.release.sendTransaction(internalWallet);
+
+        const beneficiary1Balance = await gotTokenInstance.balanceOf(internalWallet);
+
+        internalWalletBalance.should.be.bignumber.equal(beneficiary1Balance);
+    });
+
+    it('PRESALE: should release all token after vault end ', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await pgoMonthlyPresaleVaultInstance.release(presaleWallet);
+
+        const beneficiary1Balance = await gotTokenInstance.balanceOf(presaleWallet);
+
+        beneficiary1Balance.should.be.bignumber.equal(presaleWalletBalance);
     });
 });

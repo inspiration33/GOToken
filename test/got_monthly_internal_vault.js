@@ -1,4 +1,4 @@
-import {expectThrow, waitNDays, getEvents, BigNumber, increaseTimeTo} from './helpers/tools';
+import {expectThrow, waitNDays, BigNumber, increaseTimeTo} from './helpers/tools';
 import {logger as log} from "./helpers/logger";
 
 const GotCrowdSale = artifacts.require('./GotCrowdSale.sol');
@@ -10,11 +10,11 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-const VAULT_START_TIME = 1530003801;      // 26 June 2018 09:00:00 GMT
+const VAULT_START_TIME = 1530010801;      // 26 June 2018 11:00:00 GMT
 
 contract('PGOMonthlyInternalVault',(accounts) => {
     const beneficiary1 = accounts[6];
-    const beneficiary1_balance = new BigNumber(2.5e7 * 1e18);
+    const beneficiary1_balance = new BigNumber(2.85e7 * 1e18);
 
     // Provide gotTokenInstance for every test case
     let gotTokenInstance;
@@ -28,13 +28,25 @@ contract('PGOMonthlyInternalVault',(accounts) => {
         pgoMonthlyInternalVaultInstance = await PGOMonthlyInternalVault.deployed();
     });
 
+    it('should init the vaults and mint the reservation correctly', async () => {
+        const internalAddresses = [accounts[6]];
+        const internalBalances = [new BigNumber(2.85e7 * 1e18)];
+        const presaleAddresses = [accounts[5]];
+        const presaleBalances = [new BigNumber(1.5683388e7 * 1e18)];
+        const reservationAddresses = [accounts[4]];
+        const reservationBalances = [new BigNumber(0.4316612e7 * 1e18)];
+
+        await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
+        await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
+        await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances);
+    });
+
     it('should check investment data with deployed one', async () => {
-        let investor = await pgoMonthlyInternalVaultInstance.getInvestment(0);
+        let investor = await pgoMonthlyInternalVaultInstance.getInvestment(beneficiary1);
         investor[0].should.be.equal(beneficiary1);
         investor[1].should.be.bignumber.equal(beneficiary1_balance);
         investor[2].should.be.bignumber.equal(new BigNumber(0));
     });
-
     
     it('should have vested pgo tokens', async () => {
         const balance = await gotTokenInstance.balanceOf(pgoMonthlyInternalVaultInstance.address);
@@ -70,9 +82,6 @@ contract('PGOMonthlyInternalVault',(accounts) => {
         await pgoMonthlyInternalVaultInstance.release(beneficiary1);
 
         let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
-
-        log.info(beneficiary1Balance);
-
         let div21BeneficiaryBalance = beneficiary1_balance.dividedBy(21);
         
         div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
@@ -85,11 +94,23 @@ contract('PGOMonthlyInternalVault',(accounts) => {
         await pgoMonthlyInternalVaultInstance.release(beneficiary1);
 
         let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
-
-        log.info(beneficiary1Balance);
-
         let div21BeneficiaryBalance = beneficiary1_balance.dividedBy(21);
+
         div21BeneficiaryBalance = div21BeneficiaryBalance.mul(2);
+
+        div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
+    });
+
+    it('should check 3/21 of token are unlocked after 6 months', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await waitNDays(30);
+        await pgoMonthlyInternalVaultInstance.contract.release[''].sendTransaction({from: beneficiary1});
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
+        let div21BeneficiaryBalance = beneficiary1_balance.dividedBy(21);
+
+        div21BeneficiaryBalance = div21BeneficiaryBalance.mul(3);
 
         div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
     });
@@ -102,9 +123,9 @@ contract('PGOMonthlyInternalVault',(accounts) => {
 
         await increaseTimeTo(endTime);
         
-        await pgoMonthlyInternalVaultInstance.release(beneficiary1);
+        await pgoMonthlyInternalVaultInstance.release.sendTransaction(beneficiary1);
 
-        let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
+        const beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
 
         beneficiary1_balance.should.be.bignumber.equal(beneficiary1Balance);
     });

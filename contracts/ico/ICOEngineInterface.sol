@@ -1,7 +1,8 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 
 contract ICOEngineInterface {
+
     // false if the ico is not started, true if the ico is started and running, true if the ico is completed
     function started() public view returns(bool);
 
@@ -25,12 +26,10 @@ contract ICOEngineInterface {
     // returns the total number of the tokens available for the sale, must not change when the ico is started
     function totalTokens() public view returns(uint);
 
-    // returns the number of the tokens available for the ico.
-    // At the moment that the ico starts it must be equal to totalTokens(),
+    // returns the number of the tokens available for the ico. At the moment that the ico starts it must be equal to totalTokens(),
     // then it will decrease. It is used to calculate the percentage of sold tokens as remainingTokens() / totalTokens()
     function remainingTokens() public view returns(uint);
 
     // return the price as number of tokens released for each ether
     function price() public view returns(uint);
 }
-
