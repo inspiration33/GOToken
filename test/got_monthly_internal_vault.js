@@ -28,6 +28,19 @@ contract('PGOMonthlyInternalVault',(accounts) => {
         pgoMonthlyInternalVaultInstance = await PGOMonthlyInternalVault.deployed();
     });
 
+    it('should init the vaults and mint the reservation correctly', async () => {
+        const internalAddresses = [accounts[6]];
+        const internalBalances = [new BigNumber(2.5e7 * 1e18)];
+        const presaleAddresses = [accounts[5]];
+        const presaleBalances = [new BigNumber(1.35e7 * 1e18)];
+        const reservationAddresses = [accounts[4]];
+        const reservationBalances = [new BigNumber(0.875e7 * 1e18)];
+
+        await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
+        await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
+        await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances);
+    });
+
     it('should check investment data with deployed one', async () => {
         let investor = await pgoMonthlyInternalVaultInstance.getInvestment(beneficiary1);
         investor[0].should.be.equal(beneficiary1);
@@ -70,9 +83,6 @@ contract('PGOMonthlyInternalVault',(accounts) => {
         await pgoMonthlyInternalVaultInstance.release(beneficiary1);
 
         let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
-
-        log.info(beneficiary1Balance);
-
         let div21BeneficiaryBalance = beneficiary1_balance.dividedBy(21);
         
         div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
@@ -85,11 +95,23 @@ contract('PGOMonthlyInternalVault',(accounts) => {
         await pgoMonthlyInternalVaultInstance.release(beneficiary1);
 
         let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
-
-        log.info(beneficiary1Balance);
-
         let div21BeneficiaryBalance = beneficiary1_balance.dividedBy(21);
+
         div21BeneficiaryBalance = div21BeneficiaryBalance.mul(2);
+
+        div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
+    });
+
+    it('should check 3/21 of token are unlocked after 6 months', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await waitNDays(30);
+        await pgoMonthlyInternalVaultInstance.contract.release[''].sendTransaction({from: beneficiary1});
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
+        let div21BeneficiaryBalance = beneficiary1_balance.dividedBy(21);
+
+        div21BeneficiaryBalance = div21BeneficiaryBalance.mul(3);
 
         div21BeneficiaryBalance.should.be.bignumber.equal(beneficiary1Balance);
     });
@@ -102,9 +124,9 @@ contract('PGOMonthlyInternalVault',(accounts) => {
 
         await increaseTimeTo(endTime);
         
-        await pgoMonthlyInternalVaultInstance.release(beneficiary1);
+        await pgoMonthlyInternalVaultInstance.release.sendTransaction(beneficiary1);
 
-        let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
+        const beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
 
         beneficiary1_balance.should.be.bignumber.equal(beneficiary1Balance);
     });

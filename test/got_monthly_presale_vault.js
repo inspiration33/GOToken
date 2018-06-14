@@ -29,6 +29,19 @@ contract('PGOMonthlyPresaleVault',(accounts) => {
         pgoMonthlyPresaleVaultInstance = await PGOMonthlyPresaleVault.deployed();
     });
 
+    it('should init the vaults and mint the reservation correctly', async () => {
+        const internalAddresses = [accounts[6]];
+        const internalBalances = [new BigNumber(2.5e7 * 1e18)];
+        const presaleAddresses = [accounts[5]];
+        const presaleBalances = [new BigNumber(1.35e7 * 1e18)];
+        const reservationAddresses = [accounts[4]];
+        const reservationBalances = [new BigNumber(0.875e7 * 1e18)];
+
+        await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
+        await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
+        await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances);
+    });
+
     it('should increase time to ICO END', async () => {
         log.info('[ ICO END TIME ]');
         await increaseTimeTo(VAULT_START_TIME);
@@ -94,6 +107,21 @@ contract('PGOMonthlyPresaleVault',(accounts) => {
 
         let div21BeneficiaryBalance = beneficiary1_balance.mul(2).div(3).div(21);
         div21BeneficiaryBalance = div21BeneficiaryBalance.mul(2);
+        const initial33percentBalance = beneficiary1_balance.div(3);
+
+        beneficiary1Balance.should.be.bignumber.equal(div21BeneficiaryBalance.add(initial33percentBalance));
+    });
+
+    it('should check 3/21 of token are unlocked after 6 months by calling .release() from an external address', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
+        await waitNDays(30);
+        await pgoMonthlyPresaleVaultInstance.release({from: beneficiary1});
+
+        let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
+
+        let div21BeneficiaryBalance = beneficiary1_balance.mul(2).div(3).div(21);
+        div21BeneficiaryBalance = div21BeneficiaryBalance.mul(3);
         const initial33percentBalance = beneficiary1_balance.div(3);
 
         beneficiary1Balance.should.be.bignumber.equal(div21BeneficiaryBalance.add(initial33percentBalance));

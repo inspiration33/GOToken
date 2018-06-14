@@ -62,14 +62,12 @@ contract('GotPGOVault',(accounts) => {
         log.info('[ Finalized ]');
     });
 
-
     it('should increase time to release 1', async () => {
         log.info('[ Move Time to Vesting step 1]');
         await waitNDays(361);
     });
 
     it('should release internal reserve liquidity vested at step 1', async () => {
-        //force ico closing 
 
         let internalReserveWalletBalance = await gotTokenInstance.balanceOf(internalReserveWallet);
         let vaultBalance = await gotTokenInstance.balanceOf(PGOVaultAddress);

@@ -197,6 +197,8 @@ contract GotCrowdSale is Pausable, CanReclaimToken, ICOEngineInterface, KYCBase 
         onlyOwner
         equalLength(beneficiaries, balances)
     {
+        require(tokensSold == 0);
+
         uint256 totalReservationBalance = 0;
         uint256 balancesLength = balances.length;
 

@@ -5,8 +5,6 @@ import {logger} from "./helpers/logger";
 const {ecsign} = require('ethereumjs-util');
 const abi = require('ethereumjs-abi');
 const BN = require('bn.js');
-//const Web3 = require("web3");
-//const web3 = new Web3();
 
 const GotCrowdSale = artifacts.require('./GotCrowdSale.sol');
 const GotToken = artifacts.require('./GotToken.sol');
@@ -97,7 +95,17 @@ contract('GotCrowdSale',(accounts) => {
         await expectThrow(gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances));
     });
 
-    it('should mint the reservation correctly', async () => {
+    it('should fail, vaults should be initialized at correct cap', async () => {
+        const internalAddresses = [internalWallet];
+        const internalBalances = [new BigNumber(2.8e7 * 1e18)];
+        const presaleAddresses = [presaleWallet];
+        const presaleBalances = [new BigNumber(1.30e7 * 1e18)];
+
+        await expectThrow(gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances));
+        await expectThrow(gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances));
+    });
+
+    it('should init the vaults and mint the reservation correctly and only once', async () => {
         const internalAddresses = [internalWallet];
         const internalBalances = [new BigNumber(2.5e7 * 1e18)];
         const presaleAddresses = [presaleWallet];
@@ -109,9 +117,10 @@ contract('GotCrowdSale',(accounts) => {
         await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
         await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
         await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances);
-        //await gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances2);
-        //await expectThrow(gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances));
-        //await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
+
+        await expectThrow(gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances));
+        await expectThrow(gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances));
+        await expectThrow(gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances));
     });
 
     it('should have token ownership', async () => {
@@ -153,8 +162,9 @@ contract('GotCrowdSale',(accounts) => {
         reservedPresaleCap.should.be.bignumber.equal(PRESALE_VAULT_CAP);
         reservationCap.should.be.bignumber.equal(RESERVATION_CAP);
         tokensSold.should.be.bignumber.equal(RESERVATION_CAP);
-        //remaining tokens should be equal to CROWDSALE_CAP - RC (11500000 - 8000000 = 3500000)
+        //remaining tokens should be equal to CROWDSALE_CAP - RC (11500000 - 8750000 = 2750000)
         remainingTokens.should.be.bignumber.equal(CROWDSALE_CAP.sub(tokensSold));
+        remainingTokens.should.be.bignumber.equal(new BigNumber(0.275e7 * 1e18));
     });
 
     it('should instantiate the internal vault correctly', async () => {
@@ -240,7 +250,13 @@ contract('GotCrowdSale',(accounts) => {
     });
 
     it('should use KYCBase buyTokens implementation to transfer ether to the contract and revert other methods', async () => {
-        await expectThrow(web3.eth.sendTransaction({from: activeInvestor1, to: gotCrowdSaleInstance.address, value: web3.toWei(0.05, "ether")}));
+        await expectThrow(gotCrowdSaleInstance.sendTransaction({value: INVESTOR1_WEI, from: activeInvestor1}));
+    });
+
+    it('should fail, cannot call buyTokens with a KYC unverified address', async () => {
+        const SIGNER_PK_FAKE = Buffer.from('c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d2', 'hex');
+        const d = getKycData(activeInvestor1, 1, gotCrowdSaleInstance.address, SIGNER_PK_FAKE);
+        await expectThrow(gotCrowdSaleInstance.buyTokens(d.id, d.max, d.v, d.r, d.s, {from: activeInvestor1, value: INVESTOR1_WEI}));
     });
 
     it('should buyTokens', async () => {
