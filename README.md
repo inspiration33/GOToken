@@ -51,8 +51,8 @@ Tokens can be transferred by a sender to the beneficiary's address, when calling
 * Reclaimable token: allows the owner to recover any ERC20 token received. During the crowdsale period, the owner of the token is the crowdsale contract, therefore, it is convenient to reclaim tokens after the crowdsale has ended.
 
 ###### Crowdsale
-* Start time: Epoch timestamp: 1528794000 (12 June 2018 09:00:00 GMT).
-* End time: Epoch timestamp: 1530003600 (26 June 2018 09:00:00 GMT).
+* Start time: Epoch timestamp: 1529406000 (19 June 2018 11:00:00 GMT).
+* End time: Epoch timestamp: 1530003600 (26 June 2018 11:00:00 GMT).
 * Price: USD 0.75 per token.
 * Hard cap: 11.500.000 GOT tokens.
 * Pausable: owner is able to pause (and unpause) the crowdsale phase.
@@ -69,15 +69,16 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
 
 ###### Token allocation
 * Internal Reserve fund
+    * Mentioned as PGO Vault in the code.
     * 35.000.000 tokens.
-    * ¼ tokens unlocked 12 months after the end of ICO.
-    * remaining ¾ unlocked 18, 24 and 30 months after the end of ICO.
+    * ¼ tokens unlocked 360 days after the end of ICO.
+    * remaining ¾ unlocked 540, 720 and 900 days after the end of ICO.
     
 * Unlocked liquidity
     * 15.000.000 tokens.
     * Can be used for bounty programs and airdrop.
 
-* Family Pre-sale
+* Reserved Pre-sale
     * Already finished.
     * List of Presale investors wallet with GOT amount.
     * 13.500.000 tokens.
@@ -107,13 +108,13 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
 
 * Reservation phase
     * 8.750.000 tokens.
-    * 20% discount
-    * Private invitation only
-    * Require previous KYC Eidoo verification
+    * 5%, 10% or 20% discount, depending on discount code applied.
+    * 10% and 20% only with private invitation.
+    * Require previous KYC Eidoo verification.
 
 * Public ICO
-    * 2.750.000 tokens plus all not sold during Reservation phase
-    * 1 Token = 0.75 usd
+    * 2.750.000 tokens plus all not sold during Reservation phase.
+    * 1 Token = 0.75 usd.
 
 
 ## Requirements

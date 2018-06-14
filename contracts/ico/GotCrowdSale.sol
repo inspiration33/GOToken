@@ -35,12 +35,12 @@ contract GotCrowdSale is Pausable, CanReclaimToken, ICOEngineInterface, KYCBase 
     uint256 public constant RESERVED_PRESALE_CAP = 1.35e7 * 1e18;
 
     //ICO TOKEN ALLOCATION
-    //Public ICO Cap 
+    //Public ICO Cap
     //uint256 public constant CROWDSALE_CAP = 0.275e7 * 1e18;
     //Reservation contract Cap
     uint256 public constant RESERVATION_CAP = 0.875e7 * 1e18;
     //TOTAL ICO CAP
-    uint256 public constant TOTAL_MAX_CAP = 1.15e7 * 1e18;
+    uint256 public constant TOTAL_ICO_CAP = 1.15e7 * 1e18;
 
     uint256 public start;                                             // ICOEngineInterface
     uint256 public end;                                               // ICOEngineInterface
@@ -96,14 +96,14 @@ contract GotCrowdSale is Pausable, CanReclaimToken, ICOEngineInterface, KYCBase 
         KYCBase(_kycSigners)
     {
         require(END_TIME >= START_TIME);
-        require(TOTAL_MAX_CAP > 0);
+        require(TOTAL_ICO_CAP > 0);
 
         start = START_TIME;
         end = END_TIME;
-        cap = TOTAL_MAX_CAP;
+        cap = TOTAL_ICO_CAP;
         wallet = _wallet;
         tokenPerEth = USD_PER_ETHER.div(USD_PER_TOKEN);
-        availableTokens = TOTAL_MAX_CAP;
+        availableTokens = TOTAL_ICO_CAP;
         kycSigners = _kycSigners;
 
         token = GotToken(_token);
