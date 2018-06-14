@@ -100,7 +100,7 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
 * Reserved Pre-sale
     * Already finished.
     * List of Presale investors wallet with GOT amount.
-    * 15.683.388 tokens.
+    * 15.702.889 tokens.
     * 1⁄3 tokens unlocked right after the end of ICO.
     * Continuous vesting of remaining 2⁄3 tokens: starts 3 months after the end of ICO
     and ends 21 months later.
@@ -108,7 +108,7 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
     * 1 token = 0.30 usd
 
 * Reservation phase
-    * 4.316.612 tokens.
+    * 4.297.111 tokens.
     * 5%, 10% or 20% discount, depending on discount code applied.
     * 10% and 20% only with private invitation.
     * Require previous KYC verification.

@@ -32,9 +32,9 @@ contract('PGOMonthlyInternalVault',(accounts) => {
         const internalAddresses = [accounts[6]];
         const internalBalances = [new BigNumber(2.85e7 * 1e18)];
         const presaleAddresses = [accounts[5]];
-        const presaleBalances = [new BigNumber(1.5683388e7 * 1e18)];
+        const presaleBalances = [new BigNumber(1.5702889e7 * 1e18)];
         const reservationAddresses = [accounts[4]];
-        const reservationBalances = [new BigNumber(0.4316612e7 * 1e18)];
+        const reservationBalances = [new BigNumber(0.4297111e7 * 1e18)];
 
         await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
         await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
