@@ -54,7 +54,8 @@ Tokens can be transferred by a sender to the beneficiary's address, when calling
 * Start time: Epoch timestamp: 1529406000 (19 June 2018 11:00:00 GMT).
 * End time: Epoch timestamp: 1530003600 (26 June 2018 11:00:00 GMT).
 * Price: USD 0.75 per token.
-* Hard cap: 11.500.000 GOT tokens.
+* Soft Cap: 2.000.000 USD.
+* Hard cap: 12.000.000 USD.
 * Pausable: owner is able to pause (and unpause) the crowdsale phase.
 * Reclaimable token: allows the owner to recover any ERC20 token received.
 * Paused until ICO end epoch time.
@@ -78,23 +79,6 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
     * 15.000.000 tokens.
     * Can be used for bounty programs and airdrop.
 
-* Reserved Pre-sale
-    * Already finished.
-    * List of Presale investors wallet with GOT amount.
-    * 13.500.000 tokens.
-    * 1⁄3 tokens unlocked right after the end of ICO.
-    * Continuous vesting of remaining 2⁄3 tokens: starts 3 months after the end of ICO
-    and ends 21 months later.
-    * 60% Discount
-    * 1 token = 0.30 usd
-
- * Partners Pre-sale
-    * Already finished.
-    * List of Presale investors wallet with GOT amount.
-    * 10.000.000 tokens.
-    * Continuous vesting: starts 3 months after the end of ICO and ends 21 months
-    later.
-
 * Founders
     * 10.000.000 tokens assigned to a unique wallet address.
     * Continuous vesting: starts 3 months after the end of ICO and ends 21 months
@@ -106,14 +90,31 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
     * Continuous vesting: starts 3 months after the end of ICO and ends 21 months
     later.
 
+* Partners Pre-sale
+    * Already finished.
+    * List of Presale investors wallet with GOT amount.
+    * 13.500.000 tokens.
+    * Continuous vesting: starts 3 months after the end of ICO and ends 21 months
+    later.
+
+* Reserved Pre-sale
+    * Already finished.
+    * List of Presale investors wallet with GOT amount.
+    * 15.683.388 tokens.
+    * 1⁄3 tokens unlocked right after the end of ICO.
+    * Continuous vesting of remaining 2⁄3 tokens: starts 3 months after the end of ICO
+    and ends 21 months later.
+    * 60% Discount
+    * 1 token = 0.30 usd
+
 * Reservation phase
-    * 8.750.000 tokens.
+    * 4.316.612 tokens.
     * 5%, 10% or 20% discount, depending on discount code applied.
     * 10% and 20% only with private invitation.
-    * Require previous KYC Eidoo verification.
+    * Require previous KYC verification.
 
 * Public ICO
-    * 2.750.000 tokens plus all not sold during Reservation phase.
+    * 1.500.000 tokens plus all not sold during Reservation phase.
     * 1 Token = 0.75 usd.
 
 

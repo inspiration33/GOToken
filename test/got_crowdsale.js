@@ -51,12 +51,12 @@ const INVESTOR2_WEI2 = new BigNumber(6994 * 1e18);
 //const INVESTOR1_TOKEN_AMOUNT = 270 * 1e18;
 
 /*TOKEN CAPS*/
-const INTERNAL_VAULT_CAP = new BigNumber(2.5e7 * 1e18);
+const INTERNAL_VAULT_CAP = new BigNumber(2.85e7 * 1e18);
 const PGO_UNLOCKED_LIQUIDITY_CAP = new BigNumber(1.5e7 * 1e18);
-const PRESALE_VAULT_CAP = new BigNumber(1.35e7 * 1e18);
+const PRESALE_VAULT_CAP = new BigNumber(1.5683388e7 * 1e18);
 const PGO_VAULT_CAP = new BigNumber(3.5e7 * 1e18);
-const CROWDSALE_CAP = new BigNumber(1.15e7 * 1e18);
-const RESERVATION_CAP = new BigNumber(0.875e7 * 1e18);
+const CROWDSALE_CAP = new BigNumber(0.5816612e7 * 1e18);
+const RESERVATION_CAP = new BigNumber(0.4316612e7 * 1e18);
 const TOTAL_SUPPLY = new BigNumber(10e7 * 1e18);
 
 
@@ -84,11 +84,11 @@ contract('GotCrowdSale',(accounts) => {
 
     it('should fail, address and balances should have same length', async () => {
         const internalAddresses = [internalWallet];
-        const internalBalances = [new BigNumber(2.4e7 * 1e18), new BigNumber(0.1e7 * 1e18)];
+        const internalBalances = [new BigNumber(2.8e7 * 1e18), new BigNumber(0.05e7 * 1e18)];
         const presaleAddresses = [presaleWallet];
-        const presaleBalances = [new BigNumber(1.30e7 * 1e18), new BigNumber(0.05e7 * 1e18)];
+        const presaleBalances = [new BigNumber(1.50e7 * 1e18), new BigNumber(0.0683388e7 * 1e18)];
         const reservationAddresses = [reservationWallet];
-        const reservationBalances = [new BigNumber(0.7e7 * 1e18), new BigNumber(0.1e7 * 1e18)];
+        const reservationBalances = [new BigNumber(0.4e7 * 1e18), new BigNumber(0.0316612e7 * 1e18)];
 
         await expectThrow(gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances));
         await expectThrow(gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances));
@@ -97,7 +97,7 @@ contract('GotCrowdSale',(accounts) => {
 
     it('should fail, vaults should be initialized at correct cap', async () => {
         const internalAddresses = [internalWallet];
-        const internalBalances = [new BigNumber(2.8e7 * 1e18)];
+        const internalBalances = [new BigNumber(2.9e7 * 1e18)];
         const presaleAddresses = [presaleWallet];
         const presaleBalances = [new BigNumber(1.30e7 * 1e18)];
 
@@ -107,11 +107,11 @@ contract('GotCrowdSale',(accounts) => {
 
     it('should init the vaults and mint the reservation correctly and only once', async () => {
         const internalAddresses = [internalWallet];
-        const internalBalances = [new BigNumber(2.5e7 * 1e18)];
+        const internalBalances = [new BigNumber(2.85e7 * 1e18)];
         const presaleAddresses = [presaleWallet];
-        const presaleBalances = [new BigNumber(1.35e7 * 1e18)];
+        const presaleBalances = [new BigNumber(1.5683388e7 * 1e18)];
         const reservationAddresses = [reservationWallet];
-        const reservationBalances = [new BigNumber(0.875e7 * 1e18)];
+        const reservationBalances = [new BigNumber(0.4316612e7 * 1e18)];
         //const reservationBalances2 = [new BigNumber(0.075e7 * 1e18)];
 
         await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
@@ -164,7 +164,7 @@ contract('GotCrowdSale',(accounts) => {
         tokensSold.should.be.bignumber.equal(RESERVATION_CAP);
         //remaining tokens should be equal to CROWDSALE_CAP - RC (11500000 - 8750000 = 2750000)
         remainingTokens.should.be.bignumber.equal(CROWDSALE_CAP.sub(tokensSold));
-        remainingTokens.should.be.bignumber.equal(new BigNumber(0.275e7 * 1e18));
+        remainingTokens.should.be.bignumber.equal(new BigNumber(0.15e7 * 1e18));
     });
 
     it('should instantiate the internal vault correctly', async () => {

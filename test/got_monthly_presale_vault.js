@@ -14,7 +14,7 @@ const VAULT_START_TIME = 1530010801;      // 26 June 2018 11:00:00 GMT
 
 contract('PGOMonthlyPresaleVault',(accounts) => {
     const beneficiary1 = accounts[5];
-    const beneficiary1_balance = new BigNumber(1.35e7 * 1e18);
+    const beneficiary1_balance = new BigNumber(1.5683388e7 * 1e18);
 
     // Provide gotTokenInstance for every test case
     let gotCrowdSaleInstance;
@@ -31,11 +31,11 @@ contract('PGOMonthlyPresaleVault',(accounts) => {
 
     it('should init the vaults and mint the reservation correctly', async () => {
         const internalAddresses = [accounts[6]];
-        const internalBalances = [new BigNumber(2.5e7 * 1e18)];
+        const internalBalances = [new BigNumber(2.85e7 * 1e18)];
         const presaleAddresses = [accounts[5]];
-        const presaleBalances = [new BigNumber(1.35e7 * 1e18)];
+        const presaleBalances = [new BigNumber(1.5683388e7 * 1e18)];
         const reservationAddresses = [accounts[4]];
-        const reservationBalances = [new BigNumber(0.875e7 * 1e18)];
+        const reservationBalances = [new BigNumber(0.4316612e7 * 1e18)];
 
         await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
         await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);
@@ -116,7 +116,7 @@ contract('PGOMonthlyPresaleVault',(accounts) => {
         BigNumber.config({DECIMAL_PLACES:0});
 
         await waitNDays(30);
-        await pgoMonthlyPresaleVaultInstance.release({from: beneficiary1});
+        await pgoMonthlyPresaleVaultInstance.contract.release['']({from: beneficiary1});
 
         let beneficiary1Balance = await gotTokenInstance.balanceOf(beneficiary1);
 
