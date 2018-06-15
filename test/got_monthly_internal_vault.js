@@ -10,7 +10,7 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-const VAULT_START_TIME = 1530010801;      // 26 June 2018 11:00:00 GMT
+const VAULT_START_TIME = 1530655141;      // 03 July 2018 21:59:01 GMT
 
 contract('PGOMonthlyInternalVault',(accounts) => {
     const beneficiary1 = accounts[6];

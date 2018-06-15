@@ -34,9 +34,8 @@ const getKycData = (userAddr, userid, icoAddr, pk) => {
     }
 };
 
-const CROWDSALE_START_TIME = 1529406000;                                    // 19 June 2018 11:00:00 GMT
-const CROWDSALE_END_TIME = 1530010800;                                      // 26 June 2018 11:00:00 GMT
-
+const CROWDSALE_START_TIME = 1529402400;                                    // 19 June 2018 10:00:00 GMT
+const CROWDSALE_END_TIME = 1530655140;                                      // 03 July 2018 21:59:00 GMT
 
 const USD_PER_TOKEN = 0.75;
 const USD_PER_ETHER = 600;

@@ -51,8 +51,8 @@ Tokens can be transferred by a sender to the beneficiary's address, when calling
 * Reclaimable token: allows the owner to recover any ERC20 token received. During the crowdsale period, the owner of the token is the crowdsale contract, therefore, it is convenient to reclaim tokens after the crowdsale has ended.
 
 ###### Crowdsale
-* Start time: Epoch timestamp: 1529406000 (19 June 2018 11:00:00 GMT).
-* End time: Epoch timestamp: 1530003600 (26 June 2018 11:00:00 GMT).
+* Start time: Epoch timestamp: 1529402400 (19 June 2018 10:00:00 GMT).
+* End time: Epoch timestamp: 1530655140 (03 July 2018 21:59:00 GMT).
 * Price: USD 0.75 per token.
 * Soft Cap: 2.000.000 USD.
 * Hard cap: 12.000.000 USD.
