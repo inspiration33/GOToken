@@ -162,6 +162,10 @@ This will install all required dependecies in the directory _node_modules_.
 ## Compile, migrate, test and coverage
 To compile, deploy and test the smart contracts, go into the projects root directory and use the task runner accordingly.
 ```
+
+# Compile flattened contract
+npm run-script build
+
 # Compile contract
 truffle compile
 

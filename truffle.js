@@ -30,7 +30,8 @@ module.exports = {
       provider: function() {
         return new HDWalletProvider(mnemonic, "http://23.227.175.82:8545");
       },
-      network_id: 3
+      network_id: 3,
+      gas: 4612388
     }
   }
 };
