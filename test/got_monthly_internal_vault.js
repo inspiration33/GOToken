@@ -10,7 +10,7 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-const VAULT_START_TIME = 1530010801;      // 26 June 2018 11:00:00 GMT
+const VAULT_START_TIME = 1530655141;      // 03 July 2018 21:59:01 GMT
 
 contract('PGOMonthlyInternalVault',(accounts) => {
     const beneficiary1 = accounts[6];
@@ -32,9 +32,9 @@ contract('PGOMonthlyInternalVault',(accounts) => {
         const internalAddresses = [accounts[6]];
         const internalBalances = [new BigNumber(2.85e7 * 1e18)];
         const presaleAddresses = [accounts[5]];
-        const presaleBalances = [new BigNumber(1.5683388e7 * 1e18)];
+        const presaleBalances = [new BigNumber(1.5702889e7 * 1e18)];
         const reservationAddresses = [accounts[4]];
-        const reservationBalances = [new BigNumber(0.4316612e7 * 1e18)];
+        const reservationBalances = [new BigNumber(0.4297111e7 * 1e18)];
 
         await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
         await gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances);

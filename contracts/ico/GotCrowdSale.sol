@@ -19,8 +19,8 @@ import "./PGOMonthlyPresaleVault.sol";
 
 contract GotCrowdSale is Pausable, CanReclaimToken, ICOEngineInterface, KYCBase {
     /*** CONSTANTS ***/
-    uint256 public constant START_TIME = 1529406000;                     // 19 June 2018 11:00:00 GMT
-    uint256 public constant END_TIME = 1530010800;                       // 26 June 2018 11:00:00 GMT
+    uint256 public constant START_TIME = 1529402400;                     // 19 June 2018 10:00:00 GMT
+    uint256 public constant END_TIME = 1530655140;                       // 03 July 2018 21:59:00 GMT
     uint256 public constant USD_PER_TOKEN = 75;                          // 0.75$
     uint256 public constant USD_PER_ETHER = 60000;                       // REMEMBER TO CHANGE IT AT ICO START
 
@@ -32,15 +32,15 @@ contract GotCrowdSale is Pausable, CanReclaimToken, ICOEngineInterface, KYCBase 
     //Internal reserve fund
     uint256 public constant PGO_INTERNAL_RESERVE_CAP = 3.5e7 * 1e18;
     //Reserved Presale Allocation 33% free and 67% locked using Monthly Presale Vault
-    uint256 public constant RESERVED_PRESALE_CAP = 1.5683388e7 * 1e18;
+    uint256 public constant RESERVED_PRESALE_CAP = 1.5702889e7 * 1e18;
 
     //ICO TOKEN ALLOCATION
     //Public ICO Cap
     //uint256 public constant CROWDSALE_CAP = 0.15e7 * 1e18;
     //Reservation contract Cap
-    uint256 public constant RESERVATION_CAP = 0.4316612e7 * 1e18;
+    uint256 public constant RESERVATION_CAP = 0.4297111e7 * 1e18;
     //TOTAL ICO CAP
-    uint256 public constant TOTAL_ICO_CAP = 0.5816612e7 * 1e18;
+    uint256 public constant TOTAL_ICO_CAP = 0.5797111e7 * 1e18;
 
     uint256 public start;                                             // ICOEngineInterface
     uint256 public end;                                               // ICOEngineInterface

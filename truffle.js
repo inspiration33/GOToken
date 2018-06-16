@@ -5,7 +5,8 @@ require('babel-register')({
 require('babel-polyfill');
 
 const HDWalletProvider = require("truffle-hdwallet-provider");
-const mnemonic = "stuff limit piano short armor like swarm drill raw earn firm consider";
+const mnemonicRopsten = "stuff limit piano short armor like swarm drill raw earn firm consider";
+const mnemonicLive = "DONT WRITE IT HERE USE A SEPARATE GITIGNORED FILE"
 
 module.exports = {
   solc: {
@@ -28,9 +29,16 @@ module.exports = {
     },
     ropsten: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "http://23.227.175.82:8545");
+        return new HDWalletProvider(mnemonicRopsten, "http://23.227.175.82:8545");
       },
-      network_id: 3
+      network_id: 3,
+      gas: 4612388
+    },
+    "live": {
+      provider: function() {
+        return new HDWalletProvider(mnemonicLive, "http://174.138.15.5:8546");
+      },
+      network_id: 1,
     }
   }
 };

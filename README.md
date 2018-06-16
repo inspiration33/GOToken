@@ -51,9 +51,9 @@ Tokens can be transferred by a sender to the beneficiary's address, when calling
 * Reclaimable token: allows the owner to recover any ERC20 token received. During the crowdsale period, the owner of the token is the crowdsale contract, therefore, it is convenient to reclaim tokens after the crowdsale has ended.
 
 ###### Crowdsale
-* Start time: Epoch timestamp: 1529406000 (19 June 2018 11:00:00 GMT).
-* End time: Epoch timestamp: 1530003600 (26 June 2018 11:00:00 GMT).
-* Price: USD 0.75 per token.
+* Start time: Epoch timestamp: 1529402400 (19 June 2018 10:00:00 GMT).
+* End time: Epoch timestamp: 1530655140 (03 July 2018 21:59:00 GMT). 
+* Price: 0.75 USD per token.
 * Soft Cap: 2.000.000 USD.
 * Hard cap: 12.000.000 USD.
 * Pausable: owner is able to pause (and unpause) the crowdsale phase.
@@ -100,7 +100,7 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
 * Reserved Pre-sale
     * Already finished.
     * List of Presale investors wallet with GOT amount.
-    * 15.683.388 tokens.
+    * 15.702.889 tokens.
     * 1⁄3 tokens unlocked right after the end of ICO.
     * Continuous vesting of remaining 2⁄3 tokens: starts 3 months after the end of ICO
     and ends 21 months later.
@@ -108,7 +108,7 @@ https://github.com/eidoo/icoengine/blob/master/contracts/KYCBase.sol
     * 1 token = 0.30 usd
 
 * Reservation phase
-    * 4.316.612 tokens.
+    * 4.297.111 tokens.
     * 5%, 10% or 20% discount, depending on discount code applied.
     * 10% and 20% only with private invitation.
     * Require previous KYC verification.
@@ -162,6 +162,10 @@ This will install all required dependecies in the directory _node_modules_.
 ## Compile, migrate, test and coverage
 To compile, deploy and test the smart contracts, go into the projects root directory and use the task runner accordingly.
 ```
+
+# Compile flattened contract
+npm run-script build
+
 # Compile contract
 truffle compile
 

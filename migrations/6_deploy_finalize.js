@@ -24,13 +24,13 @@ module.exports = function(deployer, network, accounts) {
 
     //Initialize internal addresses
     const internalAddresses = [internalWallet];
-    const internalBalances = [new BigNumber(2.5e7 * 1e18)];
+    const internalBalances = [new BigNumber(2.85e7 * 1e18)];
     //Initialize presale addresses
     const presaleAddresses = [presaleWallet];
-    const presaleBalances = [new BigNumber(1.35e7 * 1e18)];
+    const presaleBalances = [new BigNumber(1.5702889e7 * 1e18)];
     //Initialize reservation addresses
     const reservationAddresses = [reservationWallet];
-    const reservationBalances = [new BigNumber(0.8e7 * 1e18)];
+    const reservationBalances = [new BigNumber(0.4297111e7 * 1e18)]; 
 
     //check that there are no duplicate addresses in reservationAddresses
     //const reservationAddressesSet = new Set(reservationAddresses);

@@ -36,10 +36,9 @@ const getKycData = (userAddr, userid, icoAddr, pk) => {
     }
 };
 
-const CROWDSALE_START_TIME = 1529406000;                                    // 19 June 2018 11:00:00 GMT
-const CROWDSALE_END_TIME = 1530010800;                                      // 26 June 2018 11:00:00 GMT
-const VAULT_START_TIME = 1530010801;                                        // 26 June 2018 11:00:01 GMT
-
+const CROWDSALE_START_TIME = 1529402400;    // 19 June 2018 10:00:00 GMT
+const CROWDSALE_END_TIME = 1530655140;      // 03 July 2018 21:59:00 GMT
+const VAULT_START_TIME = 1530655141;        // 03 July 2018 21:59:01 GMT
 
 const USD_PER_TOKEN = 0.75;
 const USD_PER_ETHER = 600;                                                  // REMEMBER TO CHANGE IT AT ICO START
@@ -56,10 +55,10 @@ const INVESTOR2_WEI2 = new BigNumber(6994 * 1e18);
 /*TOKEN CAPS*/
 const INTERNAL_VAULT_CAP = new BigNumber(2.85e7 * 1e18);
 const PGO_UNLOCKED_LIQUIDITY_CAP = new BigNumber(1.5e7 * 1e18);
-const PRESALE_VAULT_CAP = new BigNumber(1.5683388e7 * 1e18);
+const PRESALE_VAULT_CAP = new BigNumber(1.5702889e7 * 1e18);
 const PGO_VAULT_CAP = new BigNumber(3.5e7 * 1e18);
-const CROWDSALE_CAP = new BigNumber(0.5816612e7 * 1e18);
-const RESERVATION_CAP = new BigNumber(0.4316612e7 * 1e18);
+const CROWDSALE_CAP = new BigNumber(0.5797111e7 * 1e18);
+const RESERVATION_CAP = new BigNumber(0.4297111e7 * 1e18);
 const TOTAL_SUPPLY = new BigNumber(10e7 * 1e18);
 
 const PGO_VAULT_STEP1 = new BigNumber(0.875e7 * 1e18);
@@ -127,9 +126,9 @@ contract('GotCrowdSale',(accounts) => {
         const internalAddresses = [internalWallet];
         const internalBalances = [new BigNumber(2.8e7 * 1e18), new BigNumber(0.05e7 * 1e18)];
         const presaleAddresses = [presaleWallet];
-        const presaleBalances = [new BigNumber(1.50e7 * 1e18), new BigNumber(0.0683388e7 * 1e18)];
+        const presaleBalances = [new BigNumber(1.50e7 * 1e18), new BigNumber(0.0702889e7 * 1e18)];
         const reservationAddresses = [reservationWallet];
-        const reservationBalances = [new BigNumber(0.4e7 * 1e18), new BigNumber(0.0316612e7 * 1e18)];
+        const reservationBalances = [new BigNumber(0.4e7 * 1e18), new BigNumber(0.0297111e7 * 1e18)];
 
         await expectThrow(gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances));
         await expectThrow(gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances));
@@ -150,9 +149,9 @@ contract('GotCrowdSale',(accounts) => {
         const internalAddresses = [internalWallet];
         const internalBalances = [new BigNumber(2.85e7 * 1e18)];
         const presaleAddresses = [presaleWallet];
-        const presaleBalances = [new BigNumber(1.5683388e7 * 1e18)];
+        const presaleBalances = [new BigNumber(1.5702889e7 * 1e18)];
         const reservationAddresses = [reservationWallet];
-        const reservationBalances = [new BigNumber(0.4316612e7 * 1e18)];
+        const reservationBalances = [new BigNumber(0.4297111e7 * 1e18)];
         //const reservationBalances2 = [new BigNumber(0.075e7 * 1e18)];
 
         await gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances);
@@ -203,7 +202,7 @@ contract('GotCrowdSale',(accounts) => {
         reservedPresaleCap.should.be.bignumber.equal(PRESALE_VAULT_CAP);
         reservationCap.should.be.bignumber.equal(RESERVATION_CAP);
         tokensSold.should.be.bignumber.equal(RESERVATION_CAP);
-        //remaining tokens should be equal to CROWDSALE_CAP - RC (11500000 - 8750000 = 2750000)
+        //remaining tokens should be equal to CROWDSALE_CAP - RC
         remainingTokens.should.be.bignumber.equal(CROWDSALE_CAP.sub(tokensSold));
         remainingTokens.should.be.bignumber.equal(new BigNumber(0.15e7 * 1e18));
     });
@@ -494,6 +493,8 @@ contract('GotCrowdSale',(accounts) => {
     });
 
     it('PRESALE: should check unlocked tokens before 3 months are 1/3', async () => {
+        BigNumber.config({DECIMAL_PLACES:0});
+
         let beneficiary1Balance = await gotTokenInstance.balanceOf(presaleWallet);
         let vaultBalance = await gotTokenInstance.balanceOf(pgoMonthlyPresaleVaultInstance.address);
 
