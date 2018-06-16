@@ -52,8 +52,8 @@ Tokens can be transferred by a sender to the beneficiary's address, when calling
 
 ###### Crowdsale
 * Start time: Epoch timestamp: 1529402400 (19 June 2018 10:00:00 GMT).
-* End time: Epoch timestamp: 1530655140 (03 July 2018 21:59:00 GMT).
-* Price: USD 0.75 per token.
+* End time: Epoch timestamp: 1530655140 (03 July 2018 21:59:00 GMT). 
+* Price: 0.75 USD per token.
 * Soft Cap: 2.000.000 USD.
 * Hard cap: 12.000.000 USD.
 * Pausable: owner is able to pause (and unpause) the crowdsale phase.

@@ -30,7 +30,7 @@ module.exports = function(deployer, network, accounts) {
     const presaleBalances = [new BigNumber(1.5702889e7 * 1e18)];
     //Initialize reservation addresses
     const reservationAddresses = [reservationWallet];
-    const reservationBalances = [new BigNumber(0.4297111e7 * 1e18)];
+    const reservationBalances = [new BigNumber(0.4297111e7 * 1e18)]; 
 
     //check that there are no duplicate addresses in reservationAddresses
     //const reservationAddressesSet = new Set(reservationAddresses);
