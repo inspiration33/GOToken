@@ -9,9 +9,9 @@ module.exports = function(deployer, network, accounts) {
     let wallet = accounts[7];
 
     if (network === "ropsten") {
-        internalReserveWallet = '0x7eA91A18B73569103fc8391356E03C03AEdDd215';
-        unlockedLiquidityWallet = '0xB635fBa8569606d67922498e27B4095644FF4aEe';
-        wallet = '0xdc09d15e4269c373e75614Eed7bddf65d24a8731';
+        internalReserveWallet = '0xb650238883CA8379c00c557625Aa9d1C52CCc032';
+        unlockedLiquidityWallet = '0x125cBA615FB3BD79f55B984c7f0b622716aA4480';
+        wallet = '0xd0f1ef60389e691676a9b92d788b730477297bd7';
     }
 
     if (network === "live") {
