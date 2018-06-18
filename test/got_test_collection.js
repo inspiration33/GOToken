@@ -747,11 +747,21 @@ contract('GotCrowdSale',(accounts) => {
 
 
     it('BURNING: burns the requested amount', async function () {
+        const totalSupplyBefore = await gotTokenInstance.totalSupply();
+        logger.info(totalSupplyBefore.toNumber());
+        const initialBalance = await gotTokenInstance.balanceOf(activeInvestor1);
+        logger.info(initialBalance.toNumber());
         let amount = new BigNumber(20 * 1e18);    
-        await this.token.burn(amount, { from : activeInvestor1});
+        await gotTokenInstance.burn(amount, {from: activeInvestor1});
+      
+        const balance = await gotTokenInstance.balanceOf(activeInvestor1);
+        logger.info(balance.toNumber());
+        balance.should.be.bignumber.equal(initialBalance.sub(amount));
 
-        const balance = await this.token.balanceOf(activeInvestor1);
-        balance.should.be.bignumber.equal(initialBalance - amount);
+        const totalSupply = await gotTokenInstance.totalSupply();
+        logger.info(totalSupply.toNumber());
+        totalSupply.should.be.bignumber.equal(TOTAL_SUPPLY.sub(amount));
+        
       });
 
 });
