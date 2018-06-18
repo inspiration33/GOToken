@@ -3,10 +3,8 @@ const BigNumber = web3.BigNumber;
 const Got = artifacts.require("./GotToken.sol");
 const GotCrowdSale = artifacts.require("./GotCrowdSale.sol");
 
-/*const reservationJson = require('../rc.json');
-
-const reservationAddresses = Object.keys(reservationJson);
-const reservationBalances = Object.values(reservationJson);*/
+const presaleJson = require('../config/presaleStart.json');
+const reservationJson = require('../config/rcStart.json');
 
 module.exports = function(deployer, network, accounts) {
 
@@ -38,15 +36,23 @@ module.exports = function(deployer, network, accounts) {
         new BigNumber(0.175e7 * 1e18),
         new BigNumber(1.35e7 * 1e18)
     ];
-    //Initialize presale addresses
-    const presaleAddresses = [presaleWallet];
-    const presaleBalances = [new BigNumber(1.5702889e7 * 1e18)];
-    //Initialize reservation addresses
-    const reservationAddresses = [reservationWallet];
-    const reservationBalances = [new BigNumber(0.4297111e7 * 1e18)]; 
 
-    //check that there are no duplicate addresses in reservationAddresses
-    //const reservationAddressesSet = new Set(reservationAddresses);
+    //Initialize presale addresses
+    const presaleAddresses = presaleJson.Addresses;
+    const presaleBalances = presaleJson.Amount.map((amount) => {
+        new BigNumber(amount)
+    });
+
+    //Initialize reservation addresses
+    const reservationAddresses = reservationJson.Addresses;
+    const reservationBalances = reservationJson.Amount.map((amount) => {
+        new BigNumber(amount);
+    });
+
+    //check that there are no duplicate addresses in presale and reservation addresses
+
+    const presaleAddressesSet = new Set(presaleAddresses);
+    const reservationAddressesSet = new Set(reservationAddresses);
 
     let gotInstance;
     let gotCrowdSaleInstance;
@@ -62,9 +68,9 @@ module.exports = function(deployer, network, accounts) {
                     if (network === "ropsten") {
                         gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances).then(() => {
                             console.log('[ Initialized internal vault]');
-                            gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances).then(() => {
+                            gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddressesSet, presaleBalances).then(() => {
                                 console.log('[ Initialized presale vault]');
-                                gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances).then(() => {
+                                gotCrowdSaleInstance.mintReservation(reservationAddressesSet, reservationBalances).then(() => {
                                     console.log('[ Minted presale second step]');
                                 });
                             });
