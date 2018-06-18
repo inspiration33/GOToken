@@ -6,6 +6,7 @@ const GotCrowdSale = artifacts.require("./GotCrowdSale.sol");
 const presaleJson = require('../config/presaleStartDev.json');
 const reservationJson = require('../config/rcStart.json');
 
+
 module.exports = function(deployer, network, accounts) {
 
     let internalWallet = accounts[6];
@@ -44,11 +45,15 @@ module.exports = function(deployer, network, accounts) {
     });
 
     //Initialize reservation addresses
-    const reservationAddresses = reservationJson.Addresses;
-    const reservationBalances = reservationJson.Amount.map((amount) => {
+    const reservationAddresses = reservationJson.Addresses.slice(0,79);
+    const reservationBalances = reservationJson.Amount.slice(0,79).map((amount) => {
         return new BigNumber(amount);
     });
 
+    const reservationAddresses2 = reservationJson.Addresses.slice(79);
+    const reservationBalances2 = reservationJson.Amount.slice(79).map((amount) => {
+        return new BigNumber(amount);
+    });
     //check that there are no duplicate addresses in presale and reservation addresses
 
     const presaleAddressesSet = new Set(presaleAddresses);
@@ -81,7 +86,10 @@ module.exports = function(deployer, network, accounts) {
                             gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances).then(() => {
                                 console.log('[ Initialized presale vault]');
                                 gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances).then(() => {
-                                    console.log('[ Minted presale second step]');
+                                    console.log('[ Minted reservation first step]');
+                                    gotCrowdSaleInstance.mintReservation(reservationAddresses2, reservationBalances2).then(() => {
+                                        console.log('[ Minted reservation second step]');
+                                    });
                                 });
                             });
                         });
