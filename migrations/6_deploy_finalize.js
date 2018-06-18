@@ -3,7 +3,7 @@ const BigNumber = web3.BigNumber;
 const Got = artifacts.require("./GotToken.sol");
 const GotCrowdSale = artifacts.require("./GotCrowdSale.sol");
 
-const presaleJson = require('../config/presaleStart.json');
+const presaleJson = require('../config/presaleStartDev.json');
 const reservationJson = require('../config/rcStart.json');
 
 module.exports = function(deployer, network, accounts) {
