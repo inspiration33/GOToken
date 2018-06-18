@@ -34,7 +34,7 @@ module.exports = {
       network_id: 3,
       gas: 4612388
     },
-    "live": {
+    live: {
       provider: function() {
         return new HDWalletProvider(mnemonicLive, "http://174.138.15.5:8546");
       },
