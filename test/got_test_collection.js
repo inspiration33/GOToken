@@ -743,4 +743,15 @@ contract('GotCrowdSale',(accounts) => {
 
         beneficiary1Balance.should.be.bignumber.equal(presaleWalletBalance);
     });
+
+
+
+    it('BURNING: burns the requested amount', async function () {
+        let amount = new BigNumber(20 * 1e18);    
+        await this.token.burn(amount, { from : activeInvestor1});
+
+        const balance = await this.token.balanceOf(activeInvestor1);
+        balance.should.be.bignumber.equal(initialBalance - amount);
+      });
+
 });

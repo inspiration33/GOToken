@@ -8,10 +8,11 @@ pragma solidity ^0.4.24;
 
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/PausableToken.sol";
+import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/BurnableToken.sol";
 import "../../node_modules/openzeppelin-solidity/contracts/ownership/CanReclaimToken.sol";
 
 
-contract GotToken is CanReclaimToken, MintableToken, PausableToken {
+contract GotToken is CanReclaimToken, MintableToken, PausableToken, BurnableToken {
     string public constant name = "GOToken";
     string public constant symbol = "GOT";
     uint8 public constant decimals = 18;

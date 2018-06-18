@@ -37,4 +37,6 @@ contract('GotToken',(accounts) => {
         const balanceTokenHolder2 = await gotTokenInstance.balanceOf(tokenHolder2);
         balanceTokenHolder2.should.be.bignumber.equal(0);
     });
+
+   
 });
