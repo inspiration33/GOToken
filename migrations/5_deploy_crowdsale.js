@@ -26,7 +26,9 @@ module.exports = function(deployer, network, accounts) {
         wallet = '0xd0f1ef60389e691676a9b92d788b730477297bd7';
     }
     
-    const kycSigners = ['0x627306090abaB3A6e1400e9345bC60c78a8BEf57'.toLowerCase()];
+    //const kycSigners = ['0x627306090abaB3A6e1400e9345bC60c78a8BEf57'.toLowerCase()];
+
+    const kycSigners = ['0xdd5ecefcaa0cb5d75f7b72dc9d2ce446d6d00520', '0x4e315e5de2abbf7b745d9628ee60e4355c0fab86'];
 
     console.log('[ wallet.address ]: ' + wallet);
     console.log('[ internalReserveWallet.address ]: ' + internalReserveWallet);

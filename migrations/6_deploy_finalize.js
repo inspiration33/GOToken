@@ -3,7 +3,7 @@ const BigNumber = web3.BigNumber;
 const Got = artifacts.require("./GotToken.sol");
 const GotCrowdSale = artifacts.require("./GotCrowdSale.sol");
 
-const presaleJson = require('../config/presaleStartDev.json');
+const presaleJson = require('../config/presaleStart.json');
 const reservationJson = require('../config/rcStart.json');
 
 
@@ -16,16 +16,17 @@ module.exports = function(deployer, network, accounts) {
         '0x6BfA7ba34FB566bbCF0B8A8A443CD2e80A5d8194',
         '0x296ebb8df0B094c283eA7e1100e49168be09C66B',
         '0x365c571424a3Fe44799179d38bc38979f35ec7Bc',
-        '0xd48d6aabdc1935afaa5ef9cfe9934d82a5c0445d'//,
-        //'0xd48d6aabdc1935afaa5ef9cfe9934d82a5c0445d'
+        '0xd48d6aabdc1935afaa5ef9cfe9934d82a5c0445d',
+        '0x94f7267FFC049FBfE35192b5feD5E1E177246215',
+        '0xAA8Ea829BB6A7b0925873124BB0169c286292e10'
     ];
     const internalBalances = [
         new BigNumber(1.0e7 * 1e18),
         new BigNumber(0.3e7 * 1e18),
         new BigNumber(0.025e7 * 1e18),
-        new BigNumber(1.525e7 * 1e18)
-//        new BigNumber(0.175e7 * 1e18),
-        //new BigNumber(1.35e7 * 1e18)
+        new BigNumber(0.17e7 * 1e18),
+        new BigNumber(0.005e7 * 1e18),
+        new BigNumber(1.35e7 * 1e18)
     ];
 
     //Initialize presale addresses
