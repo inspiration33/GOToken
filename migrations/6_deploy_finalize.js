@@ -9,16 +9,6 @@ const reservationJson = require('../config/rcStart.json');
 
 module.exports = function(deployer, network, accounts) {
 
-    let internalWallet = accounts[6];
-    let presaleWallet = accounts[5];
-    let reservationWallet = accounts[4];
-
-    if ( network === "ropsten") {
-        internalWallet = '0x40a0a75255DBaa2b232d11241E74743354F3D583';
-        presaleWallet = '0xe71E9931137A90CD2A98D71306cC2F5Bc5F801F3';
-        reservationWallet = '0x57B6A3C4143A087A8d9deb6AAab67bA9D255eBBC';
-    }
-
     //The lists of addresses and expected token amounts will be loaded here at ICO deploy time
 
     //Initialize internal addresses
@@ -63,36 +53,39 @@ module.exports = function(deployer, network, accounts) {
     let gotCrowdSaleInstance;
     //load contract instances
     Got.at(Got.address).then(x => {
-        gotInstance = x;
-        GotCrowdSale.at(GotCrowdSale.address).then(crowdInstance => {
-            gotCrowdSaleInstance = crowdInstance;
-            gotInstance.transferOwnership(GotCrowdSale.address).then(() => {
-                console.log('[ Token ownership transferred to] '+ GotCrowdSale.address);
-                gotCrowdSaleInstance.mintPreAllocatedTokens().then(() => {
-                    console.log('[ UnlockedLiquidity minted, Internal reserve moved to PGOVAULT]');
-                    // if (network === "ropsten") {
-                    //     gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances).then(() => {
-                    //         console.log('[ Initialized internal vault]');
-                    //         gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddressesSet, presaleBalances).then(() => {
-                    //             console.log('[ Initialized presale vault]');
-                    //             gotCrowdSaleInstance.mintReservation(reservationAddressesSet, reservationBalances).then(() => {
-                    //                 console.log('[ Minted presale second step]');
-                    //             });
-                    //         });
-                    //     });
-                    // }
-                        gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances).then(() => {
-                            console.log('[ Initialized internal vault]');
-                            gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances).then(() => {
-                                console.log('[ Initialized presale vault]');
-                                gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances).then(() => {
-                                    console.log('[ Minted reservation first step]');
-                                    gotCrowdSaleInstance.mintReservation(reservationAddresses2, reservationBalances2).then(() => {
-                                        console.log('[ Minted reservation second step]');
+        x.owner().then(owner =>{
+            console.log("gotOwner " +  owner);
+            gotInstance = x;
+            GotCrowdSale.at(GotCrowdSale.address).then(crowdInstance => {
+                gotCrowdSaleInstance = crowdInstance;
+                gotInstance.transferOwnership(GotCrowdSale.address).then(() => {
+                    console.log('[ Token ownership transferred to] '+ GotCrowdSale.address);
+                    gotCrowdSaleInstance.mintPreAllocatedTokens().then(() => {
+                        console.log('[ UnlockedLiquidity minted, Internal reserve moved to PGOVAULT]');
+                        // if (network === "ropsten") {
+                        //     gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances).then(() => {
+                        //         console.log('[ Initialized internal vault]');
+                        //         gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddressesSet, presaleBalances).then(() => {
+                        //             console.log('[ Initialized presale vault]');
+                        //             gotCrowdSaleInstance.mintReservation(reservationAddressesSet, reservationBalances).then(() => {
+                        //                 console.log('[ Minted presale second step]');
+                        //             });
+                        //         });
+                        //     });
+                        // }
+                            gotCrowdSaleInstance.initPGOMonthlyInternalVault(internalAddresses, internalBalances).then(() => {
+                                console.log('[ Initialized internal vault]');
+                                gotCrowdSaleInstance.initPGOMonthlyPresaleVault(presaleAddresses, presaleBalances).then(() => {
+                                    console.log('[ Initialized presale vault]');
+                                    gotCrowdSaleInstance.mintReservation(reservationAddresses, reservationBalances).then(() => {
+                                        console.log('[ Minted reservation first step]');
+                                        gotCrowdSaleInstance.mintReservation(reservationAddresses2, reservationBalances2).then(() => {
+                                            console.log('[ Minted reservation second step]');
+                                        });
                                     });
                                 });
                             });
-                        });
+                    });
                 });
             });
         });

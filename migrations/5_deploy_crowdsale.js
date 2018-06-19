@@ -4,9 +4,15 @@ const PGOMonthlyInternalVault = artifacts.require("./PGOMonthlyInternalVault.sol
 const PGOMonthlyPresaleVault = artifacts.require("./PGOMonthlyPresaleVault.sol");
 
 module.exports = function(deployer, network, accounts) {
-    let internalReserveWallet = accounts[9];
-    let unlockedLiquidityWallet = accounts[8];
-    let wallet = accounts[7];
+    let internalReserveWallet ;//= accounts[9];
+    let unlockedLiquidityWallet;// = accounts[8];
+    let wallet;// = accounts[7];
+
+    if (network === "development"){
+        internalReserveWallet =  accounts[9];
+        unlockedLiquidityWallet = accounts[8];
+        wallet = accounts[7];
+    }
 
     if (network === "ropsten") {
         internalReserveWallet = '0xb650238883CA8379c00c557625Aa9d1C52CCc032';
